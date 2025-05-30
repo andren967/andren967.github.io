@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Map Text Game</title>
+<link href="css/style.css" rel="stylesheet" />
+</head>
+<body>
+<h1>Map Text Game</h1>
+
+<!-- Menu to choose between stages -->
+<div id="menu">
+    <h2>Select a Stage</h2>
+    <label>
+        <input type="checkbox" id="testmodeCheckbox" />
+        Testmode (skip animations)
+    </label>
+    <br>
+    <button onclick="startPart1()">Start Part 1: Map Game</button>
+    <button onclick="startPart2()">Start Part 2: Text Selection</button>
+</div>
+
+<!-- Part 1: Map Game -->
+<div id="part1" style="display: none;">
+    <div class="map-container">
+        <!-- The map image will be injected here by JS -->
+        <img id="map" alt="Map">
+    </div>
+    <div class="choices">
+        <button onclick="chooseText('Option 1')">ABC</button>
+        <button onclick="chooseText('Option 2')">DEF</button>
+        <button onclick="chooseText('Option 3')">GHI</button>
+    </div>
+    <div class="result" id="result"></div>
+</div>
+
+<!-- Part 2: Text Selection -->
+<div id="part2" style="display: none;">
+    <h2>Select Principles</h2>
+    <p class="highlightable-text" id="highlightableText">
+        <span>This</span> <span>is</span> <span>a</span> <span>sample</span> <span>text</span> <span>where</span> <span>you</span> <span>can</span> <span>select</span> <span>specific</span> <span>principles</span> <span>like</span> <span>honesty</span><span>,</span> <span>integrity</span><span>,</span> <span>and</span> <span>respect</span><span>.</span> <span>You</span> <span>can</span> <span>also</span> <span>select</span> <span>incorrect</span> <span>words</span> <span>like</span> <span>random</span> <span>or</span> <span>irrelevant</span><span>.</span> <span>Click</span> <span>on</span> <span>the</span> <span>words</span> <span>to</span> <span>highlight</span> <span>them</span><span>.</span>
+    </p>
+    <button onclick="finishGame()">Finish</button>
+</div>
+
+<!-- Modal for score -->
+<div class="modal" id="scoreModal">
+    <div class="modal-content">
+        <h2>Your Score</h2>
+        <p id="scoreText"></p>
+        <button onclick="closeScoreModal()">Close</button>
+    </div>
+</div>
+
+<!-- Modal for story text -->
+<div class="modal" id="storyModal">
+    <div class="modal-content">
+        <p id="storyText">Story text goes here...</p>
+        <button onclick="closeModal()">Continue</button>
+    </div>
+</div>
+
+<!-- Part 3: Principle Stages -->
+<div id="part3" style="display: none;">
+    <h2 id="part3Title">Stage: Principle</h2>
+    <div class="map-container" style="position: relative;">
+        <img src="" alt="Map" id="part3Map">
+        <div id="mapOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+            <div 
+                onclick="selectMapPart('upper-left')" 
+                style="position: absolute; top: 0; left: 0; width: 25%; height: 25%; border: 2px solid rgba(255, 0, 0, 0.5); cursor: pointer;">
+            </div>
+        </div>
+    </div>
+    <button onclick="nextMap()">Next Map</button>
+</div>
+
+<script>
+    const maps = [
+        { src: "maps/Map_Two Worlds.jpg", options: ["ABC", "DEF", "GHI"], story: "This is the story for Map 1." },
+        { src: "maps/thats the spot.jpg", options: ["JKL", "MNO", "PQR"], story: "This is the story for Map 2." },
+        { src: "maps/the squeeze.jpg", options: ["STU", "VWX", "YZA"], story: "This is the story for Map 3." }
+    ];
+
+    const correctPrinciples = ["principles", "honesty", "integrity", "respect"];
+    let selectedWords = [];
+    let activePrinciples = [];
+    let currentPrincipleIndex = 0;
+    let currentMapIndex = 0;
+
+    const mapsPerPrinciple = {
+        principles: ["maps/Map_Two Worlds.jpg", "maps/Map2.jpg", "maps/Map3.jpg", "maps/Map4.jpg"],
+        honesty: ["maps/Honesty1.jpg", "maps/Honesty2.jpg", "maps/Honesty3.jpg", "maps/Honesty4.jpg"],
+        integrity: ["maps/Integrity1.jpg", "maps/Integrity2.jpg", "maps/Integrity3.jpg", "maps/Integrity4.jpg"],
+        respect: ["maps/Respect1.jpg", "maps/Respect2.jpg", "maps/Respect3.jpg", "maps/Respect4.jpg"]
+    };
+
+    // Global testmode flag
+    let testmode = false;
+
+    // Listen for checkbox changes
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkbox = document.getElementById('testmodeCheckbox');
+        if (checkbox) {
+            checkbox.addEventListener('change', function() {
+                testmode = checkbox.checked;
+            });
+        }
+    });
+
+    function startPart1() {
+        document.getElementById('menu').style.display = 'none';
+        showPart1IntroPopup();
+    }
+
+    function startPart2() {
+        document.getElementById('menu').style.display = 'none';
+        document.getElementById('part2').style.display = 'block';
+    }
+
+    function startPart3() {
+        document.getElementById('menu').style.display = 'none';
+        document.getElementById('part2').style.display = 'none';
+        document.getElementById('part3').style.display = 'block';
+
+        // Activate only the correctly selected principles
+        activePrinciples = selectedWords.filter(word => correctPrinciples.includes(word));
+        if (activePrinciples.length === 0) {
+            alert("No principles were selected correctly. Part 3 cannot be started.");
+            document.getElementById('menu').style.display = 'block';
+            return;
+        }
+
+        loadPrincipleStage();
+    }
+
+    function loadPrincipleStage() {
+        if (currentPrincipleIndex >= activePrinciples.length) {
+            alert("You have completed all stages!");
+            document.getElementById('part3').style.display = 'none';
+            document.getElementById('menu').style.display = 'block';
+            return;
+        }
+
+        const principle = activePrinciples[currentPrincipleIndex];
+        const maps = mapsPerPrinciple[principle];
+
+        if (currentMapIndex >= maps.length) {
+            currentPrincipleIndex++;
+            currentMapIndex = 0;
+            loadPrincipleStage();
+            return;
+        }
+
+        const mapElement = document.getElementById('part3Map');
+        mapElement.src = maps[currentMapIndex];
+        document.getElementById('part3Title').textContent = `Stage: ${principle} (Map ${currentMapIndex + 1} of ${maps.length})`;
+
+        // Add specific logic for the "Two Worlds" map
+        if (maps[currentMapIndex] === "maps/Map_Two_Worlds.jpg") {
+            alert("For this map, select the principle in the upper-left corner.");
+        }
+    }
+
+    function updateMap() {
+        const mapElement = document.getElementById('map');
+        const resultElement = document.getElementById('result');
+        const buttons = document.querySelectorAll('.choices button');
+
+        // Update the map image dynamically
+        mapElement.src = maps[currentMapIndex].src;
+        mapElement.alt = "Map " + (currentMapIndex + 1);
+
+        // Update button text
+        maps[currentMapIndex].options.forEach((option, index) => {
+            buttons[index].textContent = option;
+            buttons[index].onclick = () => chooseText(option);
+        });
+
+        // Clear the result text
+        resultElement.textContent = '';
+    }
+
+    function chooseText(option) {
+        const result = document.getElementById('result');
+        result.textContent = `You chose: ${option}`;
+
+        // Move to the next map after a choice
+        currentMapIndex++;
+        if (currentMapIndex < maps.length) {
+            setTimeout(showStory, 1000); // Show story modal before the next map
+        } else {
+            result.textContent += " - Proceeding to Part 2.";
+            document.getElementById('part1').style.display = 'none'; // Hide Part 1
+            document.getElementById('part2').style.display = 'block'; // Show Part 2
+        }
+    }
+
+    function showStory() {
+        const storyModal = document.getElementById('storyModal');
+        const storyText = document.getElementById('storyText');
+
+        // Update the story text for the current map
+        storyText.textContent = maps[currentMapIndex].story;
+
+        // Show the modal
+        storyModal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        const storyModal = document.getElementById('storyModal');
+        storyModal.style.display = 'none';
+
+        // Update the map after closing the modal
+        updateMap();
+    }
+
+    function selectMapPart() {
+        const mapElement = document.getElementById('part3Map');
+        const currentMap = mapElement.src;
+
+        // Check if the user is selecting the correct part of the map
+        if (currentMap.includes("Map_Two_Worlds.jpg")) {
+            alert("You selected the principle in the upper-left corner. Proceeding to the next map...");
+        } else {
+            alert("You selected a part of the map. Proceeding to the next map...");
+        }
+
+        currentMapIndex++;
+        loadPrincipleStage();
+    }
+
+    // Highlight words in Part 2
+    document.getElementById('highlightableText').addEventListener('click', function (event) {
+        if (event.target.tagName === 'SPAN') {
+            event.target.classList.toggle('highlighted');
+            const word = event.target.textContent.replace(/[.,!?]/g, ''); // Remove punctuation
+            if (event.target.classList.contains('highlighted')) {
+                selectedWords.push(word);
+            } else {
+                selectedWords = selectedWords.filter(item => item !== word);
+            }
+        }
+    });
+
+    function finishGame() {
+        const correctSelections = selectedWords.filter(word => correctPrinciples.includes(word));
+        const incorrectSelections = selectedWords.filter(word => !correctPrinciples.includes(word));
+        const score = correctSelections.length - incorrectSelections.length;
+
+        const scoreText = document.getElementById('scoreText');
+        scoreText.innerHTML = `
+            Correct Selections: ${correctSelections.join(", ")}<br>
+            Incorrect Selections: ${incorrectSelections.join(", ")}<br>
+            Final Score: ${score}
+        `;
+
+        const scoreModal = document.getElementById('scoreModal');
+        scoreModal.style.display = 'flex';
+
+        // Automatically start Part 3 if there are correctly selected principles
+        if (correctSelections.length > 0) {
+            setTimeout(() => {
+                closeScoreModal();
+                startPart3();
+            }, 2000); // Wait 2 seconds before transitioning to Part 3
+        } else {
+            alert("No correct principles selected. Returning to the menu.");
+            document.getElementById('menu').style.display = 'block';
+        }
+    }
+
+    function closeScoreModal() {
+        const scoreModal = document.getElementById('scoreModal');
+        scoreModal.style.display = 'none';
+    }
+
+    function loadPrincipleStage() {
+        if (currentPrincipleIndex >= activePrinciples.length) {
+            alert("You have completed all stages!");
+            document.getElementById('part3').style.display = 'none';
+            document.getElementById('menu').style.display = 'block';
+            return;
+        }
+
+        const principle = activePrinciples[currentPrincipleIndex];
+        const maps = mapsPerPrinciple[principle];
+
+        if (currentMapIndex >= maps.length) {
+            currentPrincipleIndex++;
+            currentMapIndex = 0;
+            loadPrincipleStage();
+            return;
+        }
+
+        const mapElement = document.getElementById('part3Map');
+        mapElement.src = maps[currentMapIndex];
+        document.getElementById('part3Title').textContent = `Stage: ${principle} (Map ${currentMapIndex + 1} of ${maps.length})`;
+
+        // Add specific logic for the "Two Worlds" map
+        if (maps[currentMapIndex] === "maps/Map_Two_Worlds.jpg") {
+            alert("For this map, select the principle in the upper-left corner.");
+        }
+    }
+
+    function selectMapPart(area) {
+        const mapElement = document.getElementById('part3Map');
+        const currentMap = mapElement.src;
+
+        if (currentMap.includes("Map_Two_Worlds.jpg") && area === "upper-left") {
+            alert("Correct! You selected the principle in the upper-left corner.");
+        } else {
+            alert("Incorrect selection. Try again.");
+        }
+    }
+
+    function nextMap() {
+        currentMapIndex++;
+        loadPrincipleStage();
+    }
+
+    function showPart1IntroPopup() {
+        // Remove any existing popup
+        const oldPopup = document.getElementById('part1IntroPopup');
+        if (oldPopup) oldPopup.remove();
+
+        // Sections and images
+        const sections = [
+            {
+                text: `<strong>Velgravia, 1961.</strong><br>
+                A country caught in the tide of ambition, ideology, and unrest. In the capital, where pastel façades peel under the weight of old grandeur, the people turn to the only source they trust: The Sentinel, the nation's most influential newspaper.`,
+                img: "images/country.jpg",
+                alt: "Velgravia"
+            },
+            {
+                text: `Its headquarters rises like a relic from a brighter era—part cathedral, part fortress. Narrow staircases twist past marble busts of long-dead editors. Linotype machines hammer like clockwork in the belly of the building. Tea is served precisely at five. It smells of ink, brass, and expectation.`,
+                img: "images/headquarter.jpg",
+                alt: "Headquarter"
+            },
+            {
+                text: `You are Leona Mirek, a young journalist fresh out of university, brimming with idealism, ambition—and a deep, enduring love for maps.`,
+                img: "images/character.jpg",
+                alt: "Leona Mirek"
+            }
+        ];
+
+        let sectionIndex = 0;
+
+        // Create the popup overlay
+        const introPopup = document.createElement('div');
+        introPopup.id = 'part1IntroPopup';
+        introPopup.className = 'modal'; // Use your modal CSS for background
+        introPopup.innerHTML = `
+            <div class="popup-content">
+                <div id="typewriterText"></div>
+                <img id="introImage" src="" alt="">
+                <button id="nextIntroBtn" style="display:none;">Next</button>
+            </div>
+        `;
+        document.body.appendChild(introPopup);
+
+        const typewriterTarget = document.getElementById('typewriterText');
+        const introImage = document.getElementById('introImage');
+        const nextBtn = document.getElementById('nextIntroBtn');
+
+        function showSection(idx) {
+            typewriterTarget.innerHTML = "";
+            introImage.style.display = "none";
+            nextBtn.style.display = "none";
+            const html = sections[idx].text;
+            const img = sections[idx].img;
+            const alt = sections[idx].alt;
+
+            // Extract <strong> heading if present
+            const strongMatch = html.match(/<strong>(.*?)<\/strong><br\s*\/?>/i);
+            let heading = "";
+            let restHtml = html;
+            if (strongMatch) {
+                heading = strongMatch[1];
+                restHtml = html.replace(/<strong>.*?<\/strong><br\s*\/?>/i, "");
+            }
+
+            if (testmode) {
+                // Show heading and rest instantly
+                if (heading) {
+                    typewriterTarget.innerHTML = `<p><strong>${heading}</strong></p>${restHtml}`;
+                } else {
+                    typewriterTarget.innerHTML = restHtml;
+                }
+                introImage.src = img;
+                introImage.alt = alt;
+                introImage.style.display = "block";
+                nextBtn.textContent = (idx < sections.length - 1) ? "Next" : "OK";
+                nextBtn.style.display = "inline-block";
+            } else {
+                // Typewriter effect for heading, then rest
+                let i = 0, j = 0;
+                typewriterTarget.innerHTML = heading ? `<p><strong id="typewriterHeading"></strong></p><span id="typewriterRest"></span>` : `<span id="typewriterRest"></span>`;
+                const headingTarget = document.getElementById('typewriterHeading');
+                const restTarget = document.getElementById('typewriterRest');
+
+                function typeHeading() {
+                    if (heading && i < heading.length) {
+                        headingTarget.textContent += heading.charAt(i);
+                        i++;
+                        setTimeout(typeHeading, 30);
+                    } else {
+                        typeRest();
+                    }
+                }
+
+                // Remove HTML tags from restHtml for typing, preserve line breaks
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = restHtml;
+                const plainRest = tempDiv.textContent || tempDiv.innerText || "";
+
+                function typeRest() {
+                    if (j < plainRest.length) {
+                        restTarget.textContent += plainRest.charAt(j);
+                        j++;
+                        setTimeout(typeRest, 30);
+                    } else {
+                        // After typing, show the formatted HTML (but do NOT replace the whole innerHTML)
+                        if (heading) {
+                            headingTarget.textContent = heading;
+                            restTarget.innerHTML = restHtml;
+                        } else {
+                            restTarget.innerHTML = restHtml;
+                        }
+                        introImage.src = img;
+                        introImage.alt = alt;
+                        introImage.style.display = "block";
+                        nextBtn.textContent = (idx < sections.length - 1) ? "Next" : "OK";
+                        nextBtn.style.display = "inline-block";
+                    }
+                }
+
+                if (heading) {
+                    typeHeading();
+                } else {
+                    typeRest();
+                }
+            }
+        }
+
+        nextBtn.onclick = function() {
+            sectionIndex++;
+            if (sectionIndex < sections.length) {
+                showSection(sectionIndex);
+            } else {
+                introPopup.remove();
+                // Show Part 1 with background after intro popup closes
+                document.getElementById('part1').style.display = 'block';
+                updateMap();
+            }
+        };
+
+        // Show the first section
+        showSection(sectionIndex);
+    }
+
+    // Show character image popup after intro
+    function showCharacterPopup() {
+        // Remove any existing popup
+        const oldPopup = document.getElementById('characterPopup');
+        if (oldPopup) oldPopup.remove();
+
+        const characterPopup = document.createElement('div');
+        characterPopup.id = 'characterPopup';
+        characterPopup.style.position = 'fixed';
+        characterPopup.style.top = '0';
+        characterPopup.style.left = '0';
+        characterPopup.style.width = '100vw';
+        characterPopup.style.height = '100vh';
+        characterPopup.style.background = 'rgba(0,0,0,0.7)';
+        characterPopup.style.display = 'flex';
+        characterPopup.style.alignItems = 'center';
+        characterPopup.style.justifyContent = 'center';
+        characterPopup.style.zIndex = '1000';
+
+        characterPopup.innerHTML = `
+            <div class="popup-content" style="background:#fff;max-width:400px;padding:2em;border-radius:10px;box-shadow:0 2px 16px #0008;text-align:center;">
+                <img src="images/character.jpg" alt="Leona Mirek" style="max-width:100%;height:auto;border-radius:8px;margin-bottom:1em;">
+                <div style="font-family:'Special Elite','Source Sans 3',Arial,sans-serif;font-size:1.2em;margin-bottom:1em;">
+                    Leona Mirek, young journalist
+                </div>
+                <button id="closeCharacterBtn" style="margin-top:1em;">OK</button>
+            </div>
+        `;
+        document.body.appendChild(characterPopup);
+
+        document.getElementById('closeCharacterBtn').onclick = function() {
+            characterPopup.remove();
+            document.getElementById('part1').style.display = 'block';
+            updateMap();
+        };
+    }
+</script>
+</body>
+</html>
