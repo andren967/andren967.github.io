@@ -76,11 +76,103 @@
     <button onclick="nextMap()">Next Map</button>
 </div>
 
+<div id="suspicionBarContainer" style="display:none;">
+    <label for="suspicionBar">Suspicion</label>
+    <div class="suspicion-bar-bg">
+        <div id="suspicionBar"></div>
+        <span id="suspicionValue">5 / 25</span>
+    </div>
+    <div id="suspicionChange"></div>
+</div>
+
+<div class="modal" id="failureModal" style="display:none;">
+    <div class="modal-content">
+        <h2>Game Over</h2>
+        <p id="failureText">You have failed to maintain the regime's trust. The newsroom falls silent as suspicion closes in.</p>
+        <button onclick="returnToMenu()">Return to Main Menu</button>
+    </div>
+</div>
+
 <script>
+    let part1TaskIntroShown = false;
+    let suspicion = 5;
+    const suspicionMax = 25;
+    let isFailure = false;
+    
     const maps = [
-        { src: "maps/Map_Two Worlds.jpg", options: ["ABC", "DEF", "GHI"], story: "This is the story for Map 1." },
-        { src: "maps/thats the spot.jpg", options: ["JKL", "MNO", "PQR"], story: "This is the story for Map 2." },
-        { src: "maps/the squeeze.jpg", options: ["STU", "VWX", "YZA"], story: "This is the story for Map 3." }
+        {
+            src: "maps/communist_contagion_map.jpg",
+            options: [
+                 {
+                    text: "The red tide of communism spreads like a disease across Eurasia, infecting nations and undermining global stability. Moscow stands at the heart of this plague, sending its poisonous ideology outward. From Korea to the Balkans, entire regions teeter on the edge of collapse. The free world must act decisively to contain and quarantine this threat before it spreads further. Only vigilance and strength can stop the contagion.",
+                    suspicion: 5
+                 },
+                {
+                    text: "Communism continues to expand its influence across Eastern Europe and Asia, reshaping borders and alliances. Moscow’s ideological reach can now be felt in places once considered secure. Several countries have been identified as either aligned with or vulnerable to communist expansion. While containment efforts are underway, the situation remains tense. Clear strategic communication and international cooperation are essential in responding to this development.",
+                    suspicion: 2
+                },
+                {
+                    text: "Communist influence has taken hold across large parts of Eastern Europe and Northern Asia, with Moscow at the ideological center. Several neighboring regions exhibit varying degrees of alignment, whether through political pressure, occupation, or ideological sympathy. Strategic areas such as Manchuria, Iran, and Korea show signs of instability or transformation. Tensions continue to mount as ideological boundaries become increasingly visible on the global stage. These developments are shaping a new post-war geopolitical landscape.",
+                    suspicion: -2
+                }
+                ],
+            story: "Leona leaned back in her chair, eyes lingering on the headline above the map. She had chosen the middle-ground text—firm, but not alarmist. It felt like the safest path, toeing the line without sounding too eager. As the typesetters took her copy downstairs, she found herself wondering what readers would take from it. Not doubt—just curiosity, a quiet awareness that her words might shape more than she realized. A new folder landed on her desk with a quiet thud—two more maps, and the afternoon had only just begun." 
+        },
+    {
+        src: "maps/thats the spot.jpg",
+        options: [
+            {
+                text: "During the later stages of World War II, strategic attention turned toward Japan’s political and industrial core. Military leadership identified Tokyo as a pivotal objective in the Pacific campaign. The focus on concentrated targets reflected a shift toward swift and decisive action. Civilian support through increased production and logistics was considered vital to sustain military efforts. Public messaging emphasized unity, urgency, and the critical role of the homefront.",
+                suspicion: -3
+            },
+            {
+                text: "Victory lies just beyond the horizon—our aim is clear, our will unshakable. With Japan marked as the heart of enemy aggression, the time has come to strike boldly and without hesitation. Admiral Nimitz leads with resolve, pointing us toward decisive triumph. Every bullet, every bomb, every crate of supplies brings us one step closer to justice. Give us the means, and we’ll finish the job.",
+                suspicion: 5
+            },
+            {
+                text: "As the war intensifies in the Pacific, strategic focus shifts to the Japanese mainland. Military leaders emphasize the importance of Tokyo as a central hub in the enemy’s operations. Mobilization at home plays a vital role in ensuring success overseas. Supply, production, and resolve are key components in preparing for the next offensive. National unity and commitment remain essential in this phase of the conflict.",
+                suspicion: 2
+            }
+        ],
+        story: "Leona tapped the end of her pencil against the desk, staring at the phrase she’d just typed. It was bold—maybe too bold—but it matched the tone the editor would expect. She adjusted a few words, softened one sentence, but kept the resolve intact. The figure in the poster looked sure of himself, and somehow, she felt expected to match that certainty. She hadn’t even filed the piece yet when another rolled-up campaign sheet landed beside her elbow—another image, another message to craft."
+    },
+    {
+        src: "maps/divided_world.jpg",
+        options: [
+            {
+                text: "The world stands divided between freedom and oppression. The Western nations, champions of democracy and strength, must resist the tightening grip of the Eastern bloc. Led by the Soviet Union, the East amasses manpower and arms in preparation for further conquest. Every yellow-shaded region marks a struggle for truth, teetering on the edge of red domination. If the free world does not act, it risks being swallowed whole by the iron hand of Communism.",
+                suspicion: 5
+            },
+            {
+                text: "Following World War II, the global balance of power shifted into two dominant spheres. The Soviet Union and its allies represent one bloc, while the United States and Western nations form the other. Several regions remain contested, influenced by both ideologies and post-war restructuring. Military and economic statistics reflect each side's capacity and strategic priorities. These divisions mark a period of geopolitical realignment that would define international relations for decades.",
+                suspicion: -5
+            },
+            {
+                text: "Global tensions remain high in the aftermath of the Second World War, as ideological divisions harden between East and West. The Soviet Union continues to expand its influence, while the Western powers work to preserve democratic systems and economic cooperation. Areas in yellow reflect contested regions—zones of political instability and competing interests. Both sides rely on industrial strength and manpower to secure their positions. The future of many nations will likely be shaped by the outcome of these competing worldviews.",
+                suspicion: 2
+            }
+        ],
+        story: "Leona read over the numbers twice—population, coal, barrels of oil—all neat and boxed on the page. There was something about this map that felt colder than the others, as though the world had been reduced to colors, factories, and body counts. She didn’t feel uneasy, exactly—just aware of how much rested in how things were framed. With a quiet breath, she typed the final sentence and leaned back. Another map already waited in the out-tray."
+    },
+
+    {
+    src: "maps/Map_Two Worlds_lowerQuality.png",
+    options: [
+        {
+            text: "By 1950, the global landscape had hardened into two opposing blocs. The Soviet Union expanded its influence over Eastern Europe and parts of Asia, prompting the Western powers to form alliances in response. The ideological divide is clear, and tensions remain high as each side seeks to secure its sphere. Key regions now act as buffers, caught between larger forces. The world watches as balance teeters between confrontation and containment.",
+            suspicion: 2
+        },
+        {
+            text: "The post-war geopolitical order of 1950 reflects a division between Soviet-aligned and Western-aligned nations. The U.S.S.R. occupies a significant portion of Eurasia, while the United States and its allies maintain influence across the Atlantic and Pacific spheres. Neutral and contested regions lie between, highlighting the complexity of emerging Cold War alignments. Strategic interests shape alliances, military presence, and foreign policy objectives on both sides. These developments mark a new era in global power relations.",
+            suspicion: -5
+        },
+        {
+            text: "The world is now split in two: one side free, the other shackled under communist rule. The Soviet empire stretches its grip across half the globe, spreading its red shadow east and west. Behind the Iron Curtain, truth is suppressed and liberty extinguished. But the United States and its allies stand firm as a barrier to this expansion. This is not just a map—it is a warning.",
+            suspicion: 5
+        }
+    ],
+    // No story here; handled in showStory for the last map
+}
     ];
 
     const correctPrinciples = ["principles", "honesty", "integrity", "respect"];
@@ -174,47 +266,96 @@
 
         // Update button text
         maps[currentMapIndex].options.forEach((option, index) => {
-            buttons[index].textContent = option;
-            buttons[index].onclick = () => chooseText(option);
+        buttons[index].textContent = `Text ${index + 1}: ${option.text}`;
+        buttons[index].onclick = () => chooseText(option);
         });
 
         // Clear the result text
         resultElement.textContent = '';
+
+        if (!part1TaskIntroShown) {
+            part1TaskIntroShown = true;
+            showPart1TaskIntroPopup();
+            return; // Don't run the rest of updateMap until popup is closed
+        }
     }
 
     function chooseText(option) {
         const result = document.getElementById('result');
-        result.textContent = `You chose: ${option}`;
+        /*result.textContent = `You chose: ${option}`;*/
 
-        // Move to the next map after a choice
-        currentMapIndex++;
-        if (currentMapIndex < maps.length) {
-            setTimeout(showStory, 1000); // Show story modal before the next map
-        } else {
-            result.textContent += " - Proceeding to Part 2.";
-            document.getElementById('part1').style.display = 'none'; // Hide Part 1
-            document.getElementById('part2').style.display = 'block'; // Show Part 2
-        }
+        // Show the suspicion change
+        showSuspicionChange(option.suspicion);
+
+        // Suspicion logic
+        suspicion += option.suspicion;
+
+        // Clamp suspicion between 0 and suspicionMax
+        suspicion = Math.max(0, Math.min(suspicionMax, suspicion));
+        updateSuspicionBar();
+        showSuspicionChange(option.suspicion); // Show suspicion change
+
+        // Show the story for the current map
+        showStory();
     }
 
     function showStory() {
         const storyModal = document.getElementById('storyModal');
         const storyText = document.getElementById('storyText');
 
-        // Update the story text for the current map
-        storyText.textContent = maps[currentMapIndex].story;
+        // Hide choices and map when showing a story
+        document.querySelector('.choices').style.display = 'none';
+        document.querySelector('.map-container').style.display = 'none';
+
+        // If on the last map, show different story depending on suspicion
+        if (currentMapIndex === maps.length - 1) {
+            if (suspicion > 20) {
+                storyText.innerHTML = `<img src="images/transition1.png" alt="Story Image" style="max-width:100%;margin-bottom:1em;"><br>
+                Leona lingered on the glowing red expanse of the Soviet Union, her gaze tracing the exaggerated spread eastward. The hammer and sickle loomed impossibly large, and the curvature of the Earth seemed skewed—like the map was bending truth itself. Why did the West always look smaller, distant, like a fading island on the edge of the globe? She hadn’t noticed such distortions before—but now they leapt out at her. For the first time, she opened her notebook, not to write copy—but to start asking questions.`;
+            } else {
+                storyText.innerHTML = `<img src="images/game_over1.png" alt="Story Image" style="max-width:100%;margin-bottom:1em;"><br>
+                The map was bold, dramatic—just like the others. Leona typed her commentary without hesitation, echoing the same lines she’d learned to use: strength, division, vigilance. She didn’t question the scale, or why some countries seemed stretched while others shrank. She filed her text, straightened her desk, and waited for the next assignment. The maps kept coming, and Leona kept writing—never realizing that she’d become part of the message.`;
+                isFailure = true;
+            }
+        } else {
+            // Show the story for the current map
+            storyText.textContent = maps[currentMapIndex].story || "No story for this map.";
+        }
 
         // Show the modal
         storyModal.style.display = 'flex';
+
+            // If failure, hook into the modal close to show failure screen
+        if (isFailure) {
+            // Override closeModal for this case
+            const originalCloseModal = closeModal;
+            closeModal = function() {
+                storyModal.style.display = 'none';
+                document.getElementById('failureModal').style.display = 'flex';
+                // Restore closeModal for future use
+                closeModal = originalCloseModal;
+            };
+        }
+    
     }
 
-    function closeModal() {
-        const storyModal = document.getElementById('storyModal');
-        storyModal.style.display = 'none';
+function closeModal() {
+    const storyModal = document.getElementById('storyModal');
+    storyModal.style.display = 'none';
 
-        // Update the map after closing the modal
+    // Show choices and map again if still in part1 and not finished
+    if (document.getElementById('part1').style.display !== 'none' && currentMapIndex < maps.length - 1) {
+        document.querySelector('.choices').style.display = 'block';
+        document.querySelector('.map-container').style.display = 'block';
+        currentMapIndex++;
         updateMap();
+    } else {
+        // End of Part 1, proceed to Part 2
+        document.getElementById('part1').style.display = 'none';
+        document.getElementById('suspicionBarContainer').style.display = 'none';
+        document.getElementById('part2').style.display = 'block';
     }
+}
 
     function selectMapPart() {
         const mapElement = document.getElementById('part3Map');
@@ -339,9 +480,17 @@
                 alt: "Headquarter"
             },
             {
-                text: `You are Leona Mirek, a young journalist fresh out of university, brimming with idealism, ambition—and a deep, enduring love for maps.`,
+                text: `You are <strong>Leona Mirek</strong>, a young journalist fresh out of university, brimming with idealism, ambition—and a deep, enduring love for maps.`,
                 img: "images/character.jpg",
                 alt: "Leona Mirek"
+            },
+            {
+                text: `<strong>Editor Kessler</strong><span style="font-size:0.95em;"> (leaning on the doorframe, eyes on his watch):</span><br><br>
+                <em>“Mirek. You’ve got the map texts now. Simple stuff—just a few lines beneath the graphics. Keep it sharp, patriotic, and don’t get clever. These maps already tell the story—your job is to help the readers see it the right way.<br><br>
+                Don’t wander off into nuance. Stick to the message. It’s not your job to ask why or how—just make it sound clear, certain, and important. Just give them a story they can nod along to over their morning coffee. Clear?<br><br>
+                First draft on my desk before five.”</em>`,
+                img: "images/boss.jpg",
+                alt: "Editor Kessler"
             }
         ];
 
@@ -366,11 +515,38 @@
 
         function showSection(idx) {
             typewriterTarget.innerHTML = "";
+            introImage.classList.remove('visible');
+            introImage.classList.add('intro-image-fade');
             introImage.style.display = "none";
             nextBtn.style.display = "none";
             const html = sections[idx].text;
             const img = sections[idx].img;
             const alt = sections[idx].alt;
+
+            // Get the popup overlay element
+            const popupOverlay = document.getElementById('part1IntroPopup');
+
+            // Only set a custom background for the last popup (Editor Kessler)
+            if (idx === 0 || idx === 1) {
+                popupOverlay.style.backgroundImage = "url('images/street.jpg')";
+                popupOverlay.style.backgroundSize = "1000px auto";
+                popupOverlay.style.backgroundPosition = "center center";
+                popupOverlay.style.backgroundRepeat = "no-repeat";
+                popupOverlay.style.backgroundAttachment = "fixed";
+            } else if (idx === sections.length - 1) {
+                popupOverlay.style.backgroundImage = "url('images/headquarter.jpg')";
+                popupOverlay.style.backgroundSize = "1000px auto";
+                popupOverlay.style.backgroundPosition = "center center";
+                popupOverlay.style.backgroundRepeat = "no-repeat";
+                popupOverlay.style.backgroundAttachment = "fixed";
+            } else {
+                // Remove any custom background so CSS fallback is used
+                popupOverlay.style.backgroundImage = "";
+                popupOverlay.style.backgroundSize = "";
+                popupOverlay.style.backgroundPosition = "";
+                popupOverlay.style.backgroundRepeat = "";
+                popupOverlay.style.backgroundAttachment = "";
+            }
 
             // Extract <strong> heading if present
             const strongMatch = html.match(/<strong>(.*?)<\/strong><br\s*\/?>/i);
@@ -391,56 +567,68 @@
                 introImage.src = img;
                 introImage.alt = alt;
                 introImage.style.display = "block";
+                introImage.classList.remove('intro-image-fade', 'visible'); // Remove fade classes
                 nextBtn.textContent = (idx < sections.length - 1) ? "Next" : "OK";
                 nextBtn.style.display = "inline-block";
             } else {
-                // Typewriter effect for heading, then rest
-                let i = 0, j = 0;
-                typewriterTarget.innerHTML = heading ? `<p><strong id="typewriterHeading"></strong></p><span id="typewriterRest"></span>` : `<span id="typewriterRest"></span>`;
-                const headingTarget = document.getElementById('typewriterHeading');
-                const restTarget = document.getElementById('typewriterRest');
+                // 1. Show and fade in the image first
+                setTimeout(() => {
+                    introImage.src = img;
+                    introImage.alt = alt;
+                    introImage.style.display = "block";
+                    void introImage.offsetWidth; // Force reflow
+                    introImage.classList.add('visible');
 
-                function typeHeading() {
-                    if (heading && i < heading.length) {
-                        headingTarget.textContent += heading.charAt(i);
-                        i++;
-                        setTimeout(typeHeading, 30);
-                    } else {
-                        typeRest();
-                    }
-                }
+                    // 2. After fade-in, start typewriter effect for text
+                    setTimeout(() => {
+                        typewriterTarget.innerHTML = heading ? `<p><strong id="typewriterHeading"></strong></p><span id="typewriterRest"></span>` : `<span id="typewriterRest"></span>`;
+                        const headingTarget = document.getElementById('typewriterHeading');
+                        const restTarget = document.getElementById('typewriterRest');
+                        let i = 0, j = 0;
 
-                // Remove HTML tags from restHtml for typing, preserve line breaks
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = restHtml;
-                const plainRest = tempDiv.textContent || tempDiv.innerText || "";
-
-                function typeRest() {
-                    if (j < plainRest.length) {
-                        restTarget.textContent += plainRest.charAt(j);
-                        j++;
-                        setTimeout(typeRest, 30);
-                    } else {
-                        // After typing, show the formatted HTML (but do NOT replace the whole innerHTML)
-                        if (heading) {
-                            headingTarget.textContent = heading;
-                            restTarget.innerHTML = restHtml;
-                        } else {
-                            restTarget.innerHTML = restHtml;
+                        function typeHeading() {
+                            if (heading && i < heading.length) {
+                                headingTarget.textContent += heading.charAt(i);
+                                i++;
+                                setTimeout(typeHeading, 30);
+                            } else {
+                                typeRest();
+                            }
                         }
-                        introImage.src = img;
-                        introImage.alt = alt;
-                        introImage.style.display = "block";
-                        nextBtn.textContent = (idx < sections.length - 1) ? "Next" : "OK";
-                        nextBtn.style.display = "inline-block";
-                    }
-                }
 
-                if (heading) {
-                    typeHeading();
-                } else {
-                    typeRest();
-                }
+                        // Remove HTML tags from restHtml for typing, preserve line breaks
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = restHtml;
+                        const plainRest = tempDiv.textContent || tempDiv.innerText || "";
+
+                        function typeRest() {
+                            if (j < plainRest.length) {
+                                restTarget.textContent += plainRest.charAt(j);
+                                j++;
+                                setTimeout(typeRest, 30);
+                            } else {
+                                // After typing, show the formatted HTML (but do NOT replace the whole innerHTML)
+                                if (heading) {
+                                    headingTarget.textContent = heading;
+                                    restTarget.innerHTML = restHtml;
+                                } else {
+                                    restTarget.innerHTML = restHtml;
+                                }
+                                // Show the button after text is done
+                                setTimeout(() => {
+                                    nextBtn.textContent = (idx < sections.length - 1) ? "Next" : "OK";
+                                    nextBtn.style.display = "inline-block";
+                                }, 200); // Small delay after text
+                            }
+                        }
+
+                        if (heading) {
+                            typeHeading();
+                        } else {
+                            typeRest();
+                        }
+                    }, 800); // Wait for fade-in (match your CSS transition)
+                }, 50); // Wait x seconds before showing the image
             }
         }
 
@@ -450,7 +638,6 @@
                 showSection(sectionIndex);
             } else {
                 introPopup.remove();
-                // Show Part 1 with background after intro popup closes
                 document.getElementById('part1').style.display = 'block';
                 updateMap();
             }
@@ -496,6 +683,136 @@
             updateMap();
         };
     }
+
+    // When the Part 1 button is pressed:
+    document.getElementById('part1Btn').onclick = function() {
+        showPart1IntroPopup();
+        document.getElementById('part1').style.display = 'none'; // Hide task until intro popup is done
+    };
+
+    // In showPart1IntroPopup, after the last popup, just show the task:
+    nextBtn.onclick = function() {
+        sectionIndex++;
+        if (sectionIndex < sections.length) {
+            showSection(sectionIndex);
+        } else {
+            introPopup.remove();
+            document.getElementById('part1').style.display = 'block';
+            updateMap();
+        }
+    };
+
+    function showPart1TaskIntroPopup() {
+        // Remove any existing popup
+        const oldPopup = document.getElementById('part1TaskIntroPopup');
+        if (oldPopup) oldPopup.remove();
+
+        // Create the popup overlay
+        const popup = document.createElement('div');
+        popup.id = 'part1TaskIntroPopup';
+        popup.style.position = 'fixed';
+        popup.style.top = '0';
+        popup.style.left = '0';
+        popup.style.width = '100vw';
+        popup.style.height = '100vh';
+        popup.style.background = 'rgba(0,0,0,0.7)';
+        popup.style.display = 'flex';
+        popup.style.alignItems = 'center';
+        popup.style.justifyContent = 'center';
+        popup.style.zIndex = '1000';
+        popup.className = 'modal';
+        popup.innerHTML = `
+            <div class="popup-content" style="max-width: 500px;">
+                <p>
+                    <strong>Your editor has assigned you to select the accompanying text for today's published map.</strong>
+                </p>
+                <p>
+                    Choose the statement that best reflects the message <strong>The Sentinel</strong> wants to convey.<br>
+                    Your words must support the newspaper’s perspective—and by extension, the regime’s.
+                </p>
+                <p>
+                    <em>Be clear. Be confident. Be loyal.</em>
+                </p>
+                <button id="part1TaskIntroOkBtn">OK</button>
+            </div>
+        `;
+        document.body.appendChild(popup);
+
+        document.getElementById('part1TaskIntroOkBtn').onclick = function() {
+            popup.remove();
+            document.getElementById('part1').style.display = 'block';
+            document.getElementById('suspicionBarContainer').style.display = 'block'; // Show suspicion bar
+            updateSuspicionBar(); // <-- Ensure the bar and value are correct
+            updateMap();
+        };
+    }
+
+    // Automatically show Part 1 task intro popup after the character popup
+    document.getElementById('closeCharacterBtn').onclick = function() {
+        showPart1TaskIntroPopup();
+    };
+
+function updateSuspicionBar() {
+    const bar = document.getElementById('suspicionBar');
+    const val = document.getElementById('suspicionValue');
+    const percent = Math.round((suspicion / suspicionMax) * 100);
+
+    // The cover overlays the unfilled part of the bar
+    bar.innerHTML = `<div class="suspicion-bar-cover" style="left:${percent}%;width:${100 - percent}%;"></div>`;
+    val.textContent = `${suspicion} / ${suspicionMax}`;
+}
+
+function showSuspicionChange(amount) {
+    const changeDiv = document.getElementById('suspicionChange');
+    if (!changeDiv) return;
+    changeDiv.textContent = (amount > 0 ? "+" : "") + amount;
+    changeDiv.style.color = amount < 0 ? "#b22222" : "#1a7f1a";
+    changeDiv.style.opacity = "1";
+    changeDiv.style.transform = "translateY(0px)";
+    setTimeout(() => {
+        changeDiv.style.opacity = "0";
+        changeDiv.style.transform = "translateY(-20px)";
+    }, 1200);
+}
+
+function returnToMenu() {
+    // Hide all game sections and modals
+    document.getElementById('failureModal').style.display = 'none';
+    document.getElementById('scoreModal').style.display = 'none';
+    document.getElementById('storyModal').style.display = 'none';
+    document.getElementById('part1').style.display = 'none';
+    document.getElementById('part2').style.display = 'none';
+    document.getElementById('part3').style.display = 'none';
+    document.getElementById('suspicionBarContainer').style.display = 'none';
+    document.getElementById('menu').style.display = 'block';
+
+    // Remove any intro or character popups if present
+    const introPopup = document.getElementById('part1IntroPopup');
+    if (introPopup) introPopup.remove();
+    const characterPopup = document.getElementById('characterPopup');
+    if (characterPopup) characterPopup.remove();
+    const part1TaskIntroPopup = document.getElementById('part1TaskIntroPopup');
+    if (part1TaskIntroPopup) part1TaskIntroPopup.remove();
+
+    // Reset game state
+    currentMapIndex = 0;
+    suspicion = 5;
+    part1TaskIntroShown = false;
+    selectedWords = [];
+    activePrinciples = [];
+    currentPrincipleIndex = 0;
+    isFailure = false;
+
+    // Reset UI elements
+    updateSuspicionBar();
+    const result = document.getElementById('result');
+    if (result) result.textContent = '';
+    const choices = document.querySelector('.choices');
+    if (choices) choices.style.display = 'block';
+    const mapContainer = document.querySelector('.map-container');
+    if (mapContainer) mapContainer.style.display = 'block';
+}
+
 </script>
 </body>
 </html>
