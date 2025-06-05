@@ -233,7 +233,8 @@
 
     function startPart2() {
         document.getElementById('menu').style.display = 'none';
-        document.getElementById('part2').style.display = 'block';
+        //document.getElementById('part2').style.display = 'block';
+        showPart2IntroPopup();
     }
 
     function startPart3() {
@@ -934,6 +935,186 @@ function typewriterEffect(target, html, callback) {
     }
     type();
 }
+
+function showPart2IntroPopup() {
+        // Remove any existing popup
+        const oldPopup = document.getElementById('part2IntroPopup');
+        if (oldPopup) oldPopup.remove();
+
+        // Sections and images
+        const sections = [
+            {
+                text: `The newsroom buzzed with the usual rhythm—keys clacking, phones ringing, editors barking headlines across the room. But Leona barely heard it anymore. She stared at the last map she’d commented on, her fingers frozen above the typewriter keys. Something didn’t sit right. The shapes, the colors, the way the lines always seemed to serve the same story—it wasn’t chance.
+                    Without a word, she gathered her coat, slipped the map into her satchel, and walked briskly past the archives, avoiding Kessler’s line of sight. Down the stairwell, out through the side entrance, into the wind.
+                    An hour later, she stood beneath the vaulted ceiling of the National Library, surrounded by dust and silence. No editor here to steer the narrative—just shelves and shelves of forgotten truths. She wasn’t sure what she was looking for, but she knew where to begin: the maps.
+                    And this time, she’d be the one asking the questions.`,
+                img: "images/library.jpg",
+                alt: "Library"
+            },
+
+                        {
+                text: `Leona wandered through the dim stacks, her fingers trailing along cracked spines and dust-coated covers. Most titles were dry records—atlases, charts, border archives. She was about to give up when a plain linen book caught her eye.<br><br>
+                    <em>“The Language of Maps: Power, Practice, and Perception.”</em><br><br>
+                    No author, no markings—just a stamp inside: Restricted, 1930. She opened it carefully. The pages spoke of distortion, symbols, silence, and intent.
+                    She leaned against the shelf and kept reading. The maps were starting to make sense—and that frightened her.`,
+                img: "images/library_inside.jpg",
+                alt: "Library_Inside"
+            },
+        ];
+
+        let sectionIndex = 0;
+
+        // Create the popup overlay
+        const introPopup = document.createElement('div');
+        introPopup.id = 'part2IntroPopup';
+        introPopup.className = 'modal'; // Use your modal CSS for background
+        introPopup.innerHTML = `
+            <div class="popup-content">
+                <div id="typewriterText"></div>
+                <img id="introImage" src="" alt="">
+                <button id="nextIntroBtn" style="display:none;">Next</button>
+            </div>
+        `;
+        document.body.appendChild(introPopup);
+        introPopup.style.display = "flex";
+
+        const typewriterTarget = document.getElementById('typewriterText');
+        const introImage = document.getElementById('introImage');
+        const nextBtn = document.getElementById('nextIntroBtn');
+
+        function showSection(idx) {
+            let localAbort = false; // Local abort flag for this section
+
+            typewriterTarget.innerHTML = "";
+            introImage.classList.remove('visible');
+            introImage.classList.add('intro-image-fade');
+            introImage.style.display = "none";
+            nextBtn.style.display = "none";
+            const html = sections[idx].text;
+            const img = sections[idx].img;
+            const alt = sections[idx].alt;
+
+            // Extract <strong> heading if present
+            const strongMatch = html.match(/<strong>(.*?)<\/strong><br\s*\/?>/i);
+            let heading = "";
+            let restHtml = html;
+            if (strongMatch) {
+                heading = strongMatch[1];
+                restHtml = html.replace(/<strong>.*?<\/strong><br\s*\/?>/i, "");
+            }
+
+            // Remove previous click listeners by setting onclick to null
+            const popupContent = introPopup.querySelector('.popup-content');
+            introPopup.onclick = null;
+            introPopup.onclick = function(e) {
+                // Only abort if the click is not on the Next button
+                if (!e.target.closest('button')) {
+                    localAbort = true;
+                }
+            };
+
+            // Attach abort handler for this section
+            introPopup.onclick = function(e) {
+                // Prevent abort if clicking the Next button
+                if (!e.target.closest('button')) {
+                    localAbort = true;
+                }
+            };
+
+            if (testmode) {
+                if (heading) {
+                    typewriterTarget.innerHTML = `<p><strong>${heading}</strong></p>${restHtml}`;
+                } else {
+                    typewriterTarget.innerHTML = restHtml;
+                }
+                introImage.src = img;
+                introImage.alt = alt;
+                introImage.style.display = "block";
+                introImage.classList.remove('intro-image-fade', 'visible');
+                nextBtn.textContent = (idx < sections.length - 1) ? "Next" : "OK";
+                nextBtn.style.display = "inline-block";
+            } else {
+                setTimeout(() => {
+                    introImage.src = img;
+                    introImage.alt = alt;
+                    introImage.style.display = "block";
+                    void introImage.offsetWidth;
+                    introImage.classList.add('visible');
+
+                    setTimeout(() => {
+                        if (heading) {
+                            typewriterTarget.innerHTML = `<p><strong id="typewriterHeading"></strong></p><span id="typewriterRest"></span>`;
+                        } else {
+                            typewriterTarget.innerHTML = `<span id="typewriterRest"></span>`;
+                        }
+                        const headingTarget = document.getElementById('typewriterHeading');
+                        const restTarget = document.getElementById('typewriterRest');
+                        let i = 0, j = 0;
+
+                        // Remove HTML tags from restHtml for typing, preserve line breaks
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = restHtml;
+                        const plainRest = tempDiv.textContent || tempDiv.innerText || "";
+
+                        function typeHeading() {
+                            if (localAbort) {
+                                if (headingTarget) headingTarget.textContent = heading;
+                                typeRest(true);
+                                return;
+                            }
+                            if (heading && i < heading.length) {
+                                if (headingTarget) headingTarget.textContent += heading.charAt(i);
+                                i++;
+                                setTimeout(typeHeading, 30);
+                            } else {
+                                typeRest();
+                            }
+                        }
+
+                        function typeRest(forceShow) {
+                            if (localAbort || forceShow) {
+                                restTarget.innerHTML = restHtml;
+                                nextBtn.textContent = (idx < sections.length - 1) ? "Next" : "OK";
+                                nextBtn.style.display = "inline-block";
+                                return;
+                            }
+                            if (j < plainRest.length) {
+                                restTarget.textContent += plainRest.charAt(j);
+                                j++;
+                                setTimeout(() => typeRest(), 30);
+                            } else {
+                                restTarget.innerHTML = restHtml;
+                                setTimeout(() => {
+                                    nextBtn.textContent = (idx < sections.length - 1) ? "Next" : "OK";
+                                    nextBtn.style.display = "inline-block";
+                                }, 200);
+                            }
+                        }
+
+                        if (heading) {
+                            typeHeading();
+                        } else {
+                            typeRest();
+                        }
+                    }, 800);
+                }, 50);
+            }
+        }
+
+        nextBtn.onclick = function() {
+            sectionIndex++;
+            if (sectionIndex < sections.length) {
+                showSection(sectionIndex);
+            } else {
+                introPopup.remove();
+                document.getElementById('part2').style.display = 'block';
+            }
+        };
+
+        // Show the first section
+        showSection(sectionIndex);
+
+    }
 
 </script>
 </body>
