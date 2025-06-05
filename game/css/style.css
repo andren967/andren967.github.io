@@ -35,9 +35,13 @@ h1, .special-elite {
     max-width: 600px;
 }
 .map-container img {
-    width: 100%;
+    max-width: 600px;
+    max-height: 400px;
+    width: auto;
     height: auto;
-    border: 2px solid #000;
+    display: block;
+    margin: 0 auto;
+    object-fit: contain;
 }
 
 /* Choices styling */
@@ -279,4 +283,38 @@ body, h1, h2, h3, h4, h5, h6, p, .special-elite, .popup-content, .modal-content,
     font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif;
     min-width: 60px;
     text-align: right;
+}
+
+/* Map enlarge popup styles */
+#imagePopup {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    max-width: 90vw;
+    max-height: 90vh;
+    width: auto;
+    height: auto;
+    box-shadow: 0 0 32px #000;
+    z-index: 2000;
+    background: rgba(0,0,0,0.85);
+    align-items: center;
+    justify-content: center;
+    cursor: zoom-out;
+    transition: background 0.2s;
+}
+#imagePopup img {
+    max-width: 90vw;
+    max-height: 90vh;
+    box-shadow: 0 0 32px #000;
+    transition: transform 0.2s;
+    cursor: zoom-out;
+}
+
+/* Make the map image look clickable */
+#map {
+    cursor: zoom-in;
+    transition: box-shadow 0.2s;
+}
+#map:hover {
+    box-shadow: 0 0 16px #888;
 }

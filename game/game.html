@@ -93,6 +93,11 @@
     </div>
 </div>
 
+<!-- Image container-->
+ <div id="imagePopup" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:2000;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;">
+    <img id="popupImg" src="" alt="Enlarged Map" style="max-width:90vw;max-height:90vh;box-shadow:0 0 32px #000;">
+</div>
+
 <script>
     let part1TaskIntroShown = false;
     let suspicion = 5;
@@ -264,20 +269,38 @@
         mapElement.src = maps[currentMapIndex].src;
         mapElement.alt = "Map " + (currentMapIndex + 1);
 
+        // --- ADD THIS BLOCK HERE ---
+        const imagePopup = document.getElementById('imagePopup');
+        const popupImg = document.getElementById('popupImg');
+        if (mapElement && imagePopup && popupImg) {
+            mapElement.style.cursor = "zoom-in";
+            // Remove previous click listeners to avoid stacking
+            mapElement.onclick = null;
+            mapElement.onclick = function() {
+                popupImg.src = mapElement.src;
+                imagePopup.style.display = 'flex';
+            };
+            imagePopup.onclick = function() {
+                imagePopup.style.display = 'none';
+                popupImg.src = "";
+            };
+        }
+        // --- END BLOCK ---
+
         // Update button text
         maps[currentMapIndex].options.forEach((option, index) => {
         buttons[index].textContent = `Text ${index + 1}: ${option.text}`;
         buttons[index].onclick = () => chooseText(option);
-        });
+    });
 
-        // Clear the result text
-        resultElement.textContent = '';
+    // Clear the result text
+    resultElement.textContent = '';
 
-        if (!part1TaskIntroShown) {
-            part1TaskIntroShown = true;
-            showPart1TaskIntroPopup();
-            return; // Don't run the rest of updateMap until popup is closed
-        }
+    if (!part1TaskIntroShown) {
+        part1TaskIntroShown = true;
+        showPart1TaskIntroPopup();
+        return; // Don't run the rest of updateMap until popup is closed
+    }
     }
 
     function chooseText(option) {
@@ -318,8 +341,10 @@
                 isFailure = true;
             }
         } else {
-            // Show the story for the current map
-            storyText.textContent = maps[currentMapIndex].story || "No story for this map.";
+            const story = maps[currentMapIndex].story || "No story for this map.";
+            typewriterEffect(storyText, story, function() {
+                // Optionally do something when finished
+});
         }
 
         // Show the modal
@@ -514,6 +539,8 @@ function closeModal() {
         const nextBtn = document.getElementById('nextIntroBtn');
 
         function showSection(idx) {
+            let localAbort = false; // Local abort flag for this section
+
             typewriterTarget.innerHTML = "";
             introImage.classList.remove('visible');
             introImage.classList.add('intro-image-fade');
@@ -522,31 +549,6 @@ function closeModal() {
             const html = sections[idx].text;
             const img = sections[idx].img;
             const alt = sections[idx].alt;
-
-            // Get the popup overlay element
-            const popupOverlay = document.getElementById('part1IntroPopup');
-
-            // Only set a custom background for the last popup (Editor Kessler)
-            if (idx === 0 || idx === 1) {
-                popupOverlay.style.backgroundImage = "url('images/street.jpg')";
-                popupOverlay.style.backgroundSize = "1000px auto";
-                popupOverlay.style.backgroundPosition = "center center";
-                popupOverlay.style.backgroundRepeat = "no-repeat";
-                popupOverlay.style.backgroundAttachment = "fixed";
-            } else if (idx === sections.length - 1) {
-                popupOverlay.style.backgroundImage = "url('images/headquarter.jpg')";
-                popupOverlay.style.backgroundSize = "1000px auto";
-                popupOverlay.style.backgroundPosition = "center center";
-                popupOverlay.style.backgroundRepeat = "no-repeat";
-                popupOverlay.style.backgroundAttachment = "fixed";
-            } else {
-                // Remove any custom background so CSS fallback is used
-                popupOverlay.style.backgroundImage = "";
-                popupOverlay.style.backgroundSize = "";
-                popupOverlay.style.backgroundPosition = "";
-                popupOverlay.style.backgroundRepeat = "";
-                popupOverlay.style.backgroundAttachment = "";
-            }
 
             // Extract <strong> heading if present
             const strongMatch = html.match(/<strong>(.*?)<\/strong><br\s*\/?>/i);
@@ -557,8 +559,25 @@ function closeModal() {
                 restHtml = html.replace(/<strong>.*?<\/strong><br\s*\/?>/i, "");
             }
 
+            // Remove previous click listeners by setting onclick to null
+            const popupContent = introPopup.querySelector('.popup-content');
+            introPopup.onclick = null;
+            introPopup.onclick = function(e) {
+                // Only abort if the click is not on the Next button
+                if (!e.target.closest('button')) {
+                    localAbort = true;
+                }
+            };
+
+            // Attach abort handler for this section
+            introPopup.onclick = function(e) {
+                // Prevent abort if clicking the Next button
+                if (!e.target.closest('button')) {
+                    localAbort = true;
+                }
+            };
+
             if (testmode) {
-                // Show heading and rest instantly
                 if (heading) {
                     typewriterTarget.innerHTML = `<p><strong>${heading}</strong></p>${restHtml}`;
                 } else {
@@ -567,28 +586,40 @@ function closeModal() {
                 introImage.src = img;
                 introImage.alt = alt;
                 introImage.style.display = "block";
-                introImage.classList.remove('intro-image-fade', 'visible'); // Remove fade classes
+                introImage.classList.remove('intro-image-fade', 'visible');
                 nextBtn.textContent = (idx < sections.length - 1) ? "Next" : "OK";
                 nextBtn.style.display = "inline-block";
             } else {
-                // 1. Show and fade in the image first
                 setTimeout(() => {
                     introImage.src = img;
                     introImage.alt = alt;
                     introImage.style.display = "block";
-                    void introImage.offsetWidth; // Force reflow
+                    void introImage.offsetWidth;
                     introImage.classList.add('visible');
 
-                    // 2. After fade-in, start typewriter effect for text
                     setTimeout(() => {
-                        typewriterTarget.innerHTML = heading ? `<p><strong id="typewriterHeading"></strong></p><span id="typewriterRest"></span>` : `<span id="typewriterRest"></span>`;
+                        if (heading) {
+                            typewriterTarget.innerHTML = `<p><strong id="typewriterHeading"></strong></p><span id="typewriterRest"></span>`;
+                        } else {
+                            typewriterTarget.innerHTML = `<span id="typewriterRest"></span>`;
+                        }
                         const headingTarget = document.getElementById('typewriterHeading');
                         const restTarget = document.getElementById('typewriterRest');
                         let i = 0, j = 0;
 
+                        // Remove HTML tags from restHtml for typing, preserve line breaks
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = restHtml;
+                        const plainRest = tempDiv.textContent || tempDiv.innerText || "";
+
                         function typeHeading() {
+                            if (localAbort) {
+                                if (headingTarget) headingTarget.textContent = heading;
+                                typeRest(true);
+                                return;
+                            }
                             if (heading && i < heading.length) {
-                                headingTarget.textContent += heading.charAt(i);
+                                if (headingTarget) headingTarget.textContent += heading.charAt(i);
                                 i++;
                                 setTimeout(typeHeading, 30);
                             } else {
@@ -596,29 +627,23 @@ function closeModal() {
                             }
                         }
 
-                        // Remove HTML tags from restHtml for typing, preserve line breaks
-                        const tempDiv = document.createElement('div');
-                        tempDiv.innerHTML = restHtml;
-                        const plainRest = tempDiv.textContent || tempDiv.innerText || "";
-
-                        function typeRest() {
+                        function typeRest(forceShow) {
+                            if (localAbort || forceShow) {
+                                restTarget.innerHTML = restHtml;
+                                nextBtn.textContent = (idx < sections.length - 1) ? "Next" : "OK";
+                                nextBtn.style.display = "inline-block";
+                                return;
+                            }
                             if (j < plainRest.length) {
                                 restTarget.textContent += plainRest.charAt(j);
                                 j++;
-                                setTimeout(typeRest, 30);
+                                setTimeout(() => typeRest(), 30);
                             } else {
-                                // After typing, show the formatted HTML (but do NOT replace the whole innerHTML)
-                                if (heading) {
-                                    headingTarget.textContent = heading;
-                                    restTarget.innerHTML = restHtml;
-                                } else {
-                                    restTarget.innerHTML = restHtml;
-                                }
-                                // Show the button after text is done
+                                restTarget.innerHTML = restHtml;
                                 setTimeout(() => {
                                     nextBtn.textContent = (idx < sections.length - 1) ? "Next" : "OK";
                                     nextBtn.style.display = "inline-block";
-                                }, 200); // Small delay after text
+                                }, 200);
                             }
                         }
 
@@ -627,8 +652,8 @@ function closeModal() {
                         } else {
                             typeRest();
                         }
-                    }, 800); // Wait for fade-in (match your CSS transition)
-                }, 50); // Wait x seconds before showing the image
+                    }, 800);
+                }, 50);
             }
         }
 
@@ -645,6 +670,7 @@ function closeModal() {
 
         // Show the first section
         showSection(sectionIndex);
+
     }
 
     // Show character image popup after intro
@@ -811,6 +837,73 @@ function returnToMenu() {
     if (choices) choices.style.display = 'block';
     const mapContainer = document.querySelector('.map-container');
     if (mapContainer) mapContainer.style.display = 'block';
+}
+
+// Map image enlarge popup logic
+document.addEventListener('DOMContentLoaded', function() {
+    const mapImg = document.getElementById('map');
+    const imagePopup = document.getElementById('imagePopup');
+    const popupImg = document.getElementById('popupImg');
+
+    if (mapImg && imagePopup && popupImg) {
+        mapImg.style.cursor = "zoom-in";
+        mapImg.addEventListener('click', function() {
+            popupImg.src = mapImg.src;
+            imagePopup.style.display = 'flex';
+        });
+
+        imagePopup.addEventListener('click', function() {
+            imagePopup.style.display = 'none';
+            popupImg.src = "";
+        });
+    }
+});
+
+function typewriterEffect(target, html, callback) {
+    // If testmode is enabled, show the text instantly (no animation)
+    if (typeof testmode !== "undefined" && testmode) {
+        target.innerHTML = html;
+        if (callback) callback();
+        return;
+    }
+
+    // Otherwise, animate the text as before
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    const plain = tempDiv.textContent || tempDiv.innerText || "";
+
+    target.textContent = "";
+    let i = 0;
+    let localAbort = false;
+
+    // Try to find the closest modal ancestor, fallback to storyModal for legacy code
+    let modal = target.closest('.modal') || document.getElementById('storyModal');
+    if (!modal) modal = document.body;
+
+    modal.onclick = function(e) {
+        if (!e.target.closest('button')) {
+            localAbort = true;
+        }
+    };
+
+    function type() {
+        if (localAbort) {
+            target.innerHTML = html;
+            if (callback) callback();
+            modal.onclick = null;
+            return;
+        }
+        if (i < plain.length) {
+            target.textContent += plain.charAt(i);
+            i++;
+            setTimeout(type, 18);
+        } else {
+            target.innerHTML = html;
+            if (callback) callback();
+            modal.onclick = null;
+        }
+    }
+    type();
 }
 
 </script>
