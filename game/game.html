@@ -3,15 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Map Text Game</title>
+<title>Drawn to Deceive</title>
 <link href="css/style.css" rel="stylesheet" />
 </head>
 <body>
-<h1>Map Text Game</h1>
+<h1>Drawn to Deceive</h1>
+
+<!-- Title Screen -->
+<div id="titleScreen">
+    <h1 class="main-title">
+        <span class="title-shadow">Drawn to Deceive</span>
+        <span class="title-main">Drawn to Deceive</span></span>
+    </h1>
+    <img src="images/title_screen.jpg" alt="Drawn to Deceive" id="titleScreenImg">
+    <button id="startGameBtn" onclick="handleStartGame()">Start Game</button>
+</div>
 
 <!-- Menu to choose between stages -->
-<div id="menu">
+<div id="menu" style="display:none;">
     <h2>Select a Stage</h2>
+    <div id="principleBadges" style="margin:1em 0; text-align:center;"></div>
     <label>
         <input type="checkbox" id="testmodeCheckbox" />
         Testmode (skip animations)
@@ -19,6 +30,9 @@
     <br>
     <button onclick="startPart1()">Start Part 1: Map Game</button>
     <button onclick="startPart2()">Start Part 2: Text Selection</button>
+    <button onclick="startPart3()">Start Part 3: Principles</button>
+    <button onclick="startPart4()">Start Part 4: Two Worlds Principle Discovery</button>
+    <button onclick="showThankYouPopup()">Start Thank You</button>
 </div>
 
 <!-- Part 1: Map Game -->
@@ -52,13 +66,12 @@
         <span>So</span> <span>while</span> <span>a</span> <span>map</span> <span>may</span> <span>appear</span> <span>factual,</span> <span>it</span> <span>is</span> <span>never</span> <span>neutral.</span> <span>It</span> <span>reflects</span> <span>not</span> <span>just</span> <span>where</span> <span>things</span> <span>are,</span> <span>but</span> <span>how</span> <span>someone,</span> <span>somewhere,</span> <span>wanted</span> <span>them</span> <span>to</span> <span>be</span> <span>seen.</span>
   
     </p>
-    <button onclick="finishGame()">Finish</button>
+    <button class="popup-content" onclick="finishGame()">Finish</button>
 </div>
 
 <!-- Modal for score -->
 <div class="modal" id="scoreModal">
     <div class="modal-content">
-        <h2>Your Score</h2>
         <p id="scoreText"></p>
         <button onclick="closeScoreModal()">Close</button>
     </div>
@@ -84,7 +97,7 @@
             </div>
         </div>
     </div>
-    <button onclick="nextMap()">Next Map</button>
+    <div id="principleList" style="margin-top:1em;text-align:center;"></div>
 </div>
 
 <div id="suspicionBarContainer" style="display:none;">
@@ -98,7 +111,7 @@
 
 <div class="modal" id="failureModal" style="display:none;">
     <div class="modal-content">
-        <h2>Game Over</h2>
+        <h2>Game Over</h2>part3
         <p id="failureText">You have failed to maintain the regime's trust. The newsroom falls silent as suspicion closes in.</p>
         <button onclick="returnToMenu()">Return to Main Menu</button>
     </div>
@@ -115,6 +128,8 @@
     const suspicionMax = 25;
     let isFailure = false;
     
+    let completedPrinciples = [];
+
     const maps = [
         {
             src: "maps/communist_contagion_map.jpg",
@@ -196,22 +211,318 @@
                                 "symbolization",
                                 "generalization",
                                 "classification",
-                                "scale",
+                                "Scale",
                                 "Framing and orientation",
                                 "Labeling and text placement",
                                 "colour"];
-;
+
+    const principlesBadges = {
+        projection: "badges/projection.jpg",
+        symbolization: "badges/symbolization.jpg",
+        generalization: "badges/generalization.jpg",
+        classification: "badges/classification.jpg",
+        Scale: "badges/scale.jpg",
+        "Framing and orientation": "badges/framing.jpg",
+        "Labeling and text placement": "badges/labeling.jpg",
+        colour: "badges/colour.jpg"
+    };                            
+    
+
     let selectedWords = [];
     let activePrinciples = [];
     let currentPrincipleIndex = 0;
     let currentMapIndex = 0;
 
     const mapsPerPrinciple = {
-        principles: ["maps/Map_Two Worlds.jpg", "maps/Map2.jpg", "maps/Map3.jpg", "maps/Map4.jpg"],
-        honesty: ["maps/Honesty1.jpg", "maps/Honesty2.jpg", "maps/Honesty3.jpg", "maps/Honesty4.jpg"],
-        integrity: ["maps/Integrity1.jpg", "maps/Integrity2.jpg", "maps/Integrity3.jpg", "maps/Integrity4.jpg"],
-        respect: ["maps/Respect1.jpg", "maps/Respect2.jpg", "maps/Respect3.jpg", "maps/Respect4.jpg"]
+        projection: ["maps/divided_world.jpg", "maps/colonial_problem.jpg", "maps/Three_faces_of_Europe_1950.jpg", "maps/PJM_2454_01.jpg"],
+        symbolization: ["maps/communists_menace_vital_materials.jpg", "maps/concept_of_deterrence.jpg", "maps/east vs west.jpg", "maps/war_against_america.jpg"],
+        generalization: ["maps/united_europe_for_peace.jpg", "maps/fifth_column_in_the_south.jpg", "maps/communists_menace_vital_materials.jpg", "maps/communist_contagion.jpg"],
+        classification: ["maps/communist_contagion.jpg", "maps/Defense_of_Europe_1954.jpg", "maps/PJM_2454_01.jpg", "maps/Three_faces_of_Europe_1950.jpg"],
+        Scale: ["maps/growth_of_russian_imperialism.jpg", "maps/europe_from_moscow.jpg", "maps/communist_contagion.jpg", "maps/Defense_of_Europe_1954.jpg"],
+        "Framing and orientation": ["maps/which_is_the_side_of_peace.jpg", "maps/europe_from_moscow.jpg", "maps/thats the spot.jpg", "maps/Framing4.jpg"],
+        "Labeling and text placement": ["maps/thats the spot.jpg", "maps/colonial_problem.jpg", "maps/which_is_the_side_of_peace.jpg", "maps/war_against_america.jpg"],
+        colour: ["maps/alaska.jpg", "maps/Asian_rimland_1950.jpg", "maps/colonial_problem.jpg", "maps/divided_world.jpg"]
     };
+
+ const mapOverlays = {
+    "maps/divided_world.jpg": [
+        {
+            area: "central-eurasia",
+            top: "32%",
+            left: "38%",
+            width: "26%",
+            height: "32%",
+            description: "A traditional rectangular projection emphasizes separation between East and West, aligning with the ideological divide. Bold red and green color schemes heighten emotional impact, visually distinguishing 'us' from 'them' through aggressive contrast."
+        }
+    ],
+    "maps/colonial_problem.jpg": [
+        {
+            area: "eurasia-focus",
+            top: "30%",
+            left: "45%",
+            width: "30%",
+            height: "40%",
+            description: "The rectangular projection flattens and centers Soviet landmass, while vivid colors segment the colonial world by empire. Bold typographic blocks occupy colonies, making political ownership more prominent than the land itself—subtly reinforcing power hierarchies."
+        }
+    ],
+    "maps/Three_faces_of_Europe_1950.jpg": [
+        {
+            area: "evolution-slice",
+            top: "15%",
+            left: "30%",
+            width: "40%",
+            height: "70%",
+            description: "Stacked temporal views use a distorted perspective to exaggerate continuity in threats across decades. Classifying regions under visual regimes (WWI, WWII, Cold War) guides the viewer to draw conclusions about ideological evolution."
+        }
+    ],
+    "maps/PJM_2454_01.jpg": [
+        {
+            area: "binary-division",
+            top: "30%",
+            left: "34%",
+            width: "33%",
+            height: "35%",
+            description: "The distorted projection emphasizes Soviet and European landmasses while minimizing others. Combined with bold classifications into rigid ideological camps, it reinforces a binary worldview."
+        }
+    ],
+    "maps/communists_menace_vital_materials.jpg": [
+        {
+            area: "threat-arcs",
+            top: "28%",
+            left: "36%",
+            width: "38%",
+            height: "44%",
+            description: "Thick black arrows with numbers radiate from the Soviet Union like weapons, labeled with threatening economic commodities. By abstracting regions into numbered 'targets', the map suggests a coordinated campaign without showing any actual events or borders."
+        }
+    ],
+    "maps/concept_of_deterrence.jpg": [
+        {
+            area: "missile-web",
+            top: "25%",
+            left: "30%",
+            width: "42%",
+            height: "48%",
+            description: "The web of intersecting missile arcs, planes, and lines visually constructs a narrative of strategic superiority and omnipresent readiness. Symbols replace geography, turning the globe into a stage for conflict, with the U.S. appearing both distant and prepared."
+        }
+    ],
+    "maps/east vs west.jpg": [
+        {
+            area: "iron-curtain",
+            top: "25%",
+            left: "42%",
+            width: "32%",
+            height: "48%",
+            description: "Cartoon symbols depict Uncle Sam wheeling Western goods toward barricaded, menaced Eastern Europe, which is patrolled by black beasts. This visual metaphor frames the Cold War not as politics, but as a battle of civilization versus savagery."
+        }
+    ],
+    "maps/war_against_america.jpg": [
+        {
+            area: "usa-threats",
+            top: "20%",
+            left: "25%",
+            width: "50%",
+            height: "60%",
+            description: "Here, symbolic clouds and arrows represent abstract threats like propaganda and psychological warfare. The map relies entirely on symbolic visual cues rather than geographic accuracy to deliver its persuasive message."
+        }
+    ],
+    "maps/united_europe_for_peace.jpg": [
+        {
+            area: "umbrella-europe",
+            top: "30%",
+            left: "30%",
+            width: "38%",
+            height: "50%",
+            description: "The map uses visual symbolism and dramatic simplification, generalizing Europe’s unity under shared values by representing it as a child holding a unified umbrella against a looming red threat, minimizing geographic specifics for narrative clarity."
+        }
+    ],
+    "maps/fifth_column_in_the_south.jpg": [
+        {
+            area: "southern-us",
+            top: "50%",
+            left: "20%",
+            width: "50%",
+            height: "35%",
+            description: "Red symbols are scattered loosely over the Southern U.S., suggesting communist infiltration without context. The oversimplified layout equates internal dissent with external threat, generalizing fear across the entire region."
+        }
+    ],
+    "maps/communist_contagion.jpg": [
+        {
+            area: "contagion-zone",
+            top: "20%",
+            left: "28%",
+            width: "45%",
+            height: "50%",
+            description: "This map merges entire nations and regions under broad, stylized labels like “Quarantined” or “Infected.” The exaggerated red mass and uniform stripes across disparate countries simplify geopolitical dynamics into a medical metaphor, using fear to replace nuance."
+        }
+    ],
+    "maps/Defense_of_Europe_1954.jpg": [
+        {
+            area: "europe-focus",
+            style: "position:absolute;top:30%;left:35%;width:40%;height:35%;border:none;background-color:rgba(0,0,0,0);cursor:pointer;",
+            description: "This map classifies countries into NATO-aligned and enemy zones using stark, flat colors, stripping away complexity in political relationships. The globe’s curvature is exaggerated to compress geographic distances, making Soviet proximity feel more immediate and threatening."
+        }
+    ],
+    "maps/growth_of_russian_imperialism.jpg": [
+        {
+            area: "shading-expansion",
+            top: "25%",
+            left: "35%",
+            width: "40%",
+            height: "45%",
+            description: "Territorial expansion is exaggerated through progressive shadings and inset maps. This manipulation of scale makes each phase of Soviet growth seem massive and continuous, invoking a sense of unstoppable advance."
+        }
+    ],
+    "maps/europe_from_moscow.jpg": [
+        {
+            area: "soviet-horizon",
+            top: "28%",
+            left: "30%",
+            width: "40%",
+            height: "45%",
+            description: "By presenting Europe and Asia from Moscow’s perspective, the map exaggerates Soviet spatial reach. The tilted orientation and enlarged areas near Russia convey omnipresence, making Western viewers feel surrounded."
+        }
+    ],
+    "maps/which_is_the_side_of_peace.jpg": [
+        {
+            area: "peace-divide",
+            top: "28%",
+            left: "33%",
+            width: "35%",
+            height: "45%",
+            description: "The split-screen layout and mirrored geographies invite direct comparison between West and East. Labels and color choices frame the West as open and peaceful, the East as aggressive, urging the viewer to pick a “side.”"
+        }
+    ],
+    "maps/thats the spot.jpg": [
+        {
+            area: "target-japan",
+            top: "20%",
+            left: "42%",
+            width: "28%",
+            height: "38%",
+            description: "This poster-style map directs attention toward Japan as a target using concentric circles and bold pointer gesture, while text placement reinforces the message. Framing Tokyo centrally constructs it as the locus of military focus."
+        }
+    ],
+    "maps/Framing4.jpg": [
+        {
+            area: "crop-focus",
+            top: "30%",
+            left: "30%",
+            width: "40%",
+            height: "40%",
+            description: "Deliberate cropping and emphasis change what feels central or marginal."
+        }
+    ],
+    "maps/alaska.jpg": [
+        {
+            area: "defensive-alaska",
+            top: "28%",
+            left: "28%",
+            width: "45%",
+            height: "48%",
+            description: "The use of green tones lends a calm, natural legitimacy to U.S. territory, while darker contrasting shades highlight military presence and infrastructure. This selective color use masks militarization under the appearance of neutral geography."
+        }
+    ],
+    "maps/Asian_rimland_1950.jpg": [
+        {
+            area: "red-waves",
+            top: "25%",
+            left: "45%",
+            width: "35%",
+            height: "50%",
+            description: "Red concentric waves radiating from the U.S.S.R. create a sense of creeping influence and expansion. Color contrasts (red vs. green vs. blue) visually encode ideological alliances, suggesting both threat proximity and containment urgency."
+        }
+    ]
+};
+
+const principleStorySnippets = {
+    projection: "Leona traced her finger across the stretched-out USSR and frowned. 'They made it look bigger,' she murmured. 'Not just geographically—but ideologically too.'",
+    symbolization: "When Leona saw the cartoon clouds marked 'Psychological Warfare,' she chuckled—then stopped. 'It's not geography,' she realized. 'It's fear, dressed up like a map.'",
+    generalization: "Looking at the scattered red symbols across the South, Leona whispered, 'It’s not about *where* danger is—it’s that it could be *anywhere*.' The vagueness was the message.",
+    classification: "As she studied the neatly color-coded blocs, Leona understood: 'This map doesn’t describe countries—it *sorts* them. Into allies, threats, and nothing in between.'",
+    Scale: "With each deeper shade across the Soviet frontier, Leona blinked. 'It’s not just territory,' she thought. 'It’s momentum. Scale makes expansion look *inevitable*.'",
+    "Framing and orientation": "Leona tilted her head and saw it—the map’s tilt wasn’t accidental. 'They’ve made the Soviet Union loom,' she said. 'Framing turns position into power.'",
+    "Labeling and text placement": "A bold label screamed from the map’s center. Leona leaned in. 'They’ve chosen what we *read* first,' she realized. 'And what we might not see at all.'",
+    colour: "Red. So much red. Leona stepped back and saw how the color alone told a story. 'They don’t need to explain,' she muttered. 'The red does the shouting.'"
+};
+
+const twoWorldsMapOverlays = [
+    {
+        principle: "projection",
+        area: "central-eurasia",
+        top: "28%",
+        left: "34%",
+        width: "30%",
+        height: "38%",
+        description: "The curved projection places Eurasia in the center, visually inflating Soviet territory while pushing the Americas to the periphery—intensifying the perception of Soviet dominance and geographic centrality in global conflict."
+    },
+    {
+        principle: "colour",
+        area: "east-west-color",
+        top: "20%",
+        left: "62%",
+        width: "25%",
+        height: "35%",
+        description: "Bold red for the USSR and dark blue for the West visually encode ideological opposition. The aggressive saturation of red evokes danger and urgency, while the cool blues suggest order and alliance."
+    },
+    {
+        principle: "classification",
+        area: "bloc-zoning",
+        top: "40%",
+        left: "40%",
+        width: "30%",
+        height: "25%",
+        description: "Regions are classified into clearly delineated ideological zones using color coding and hatch patterns—‘Soviet-aligned’, ‘Western-aligned’, and ‘contested’—framing the world as a rigid dichotomy."
+    },
+    {
+        principle: "Scale",
+        area: "soviet-dominance",
+        top: "30%",
+        left: "45%",
+        width: "35%",
+        height: "40%",
+        description: "The USSR is visually overrepresented through enlarged landmass and centralized placement, creating an inflated impression of power and reach that may not align with geographic reality."
+    },
+    {
+        principle: "Framing and orientation",
+        area: "frame-focus",
+        top: "10%",
+        left: "25%",
+        width: "50%",
+        height: "75%",
+        description: "The globe is tilted to center Eurasia and the Soviet threat, marginalizing the Americas. This orientation places ideological confrontation at the heart of the world, reinforcing urgency and proximity."
+    },
+    {
+        principle: "Labeling and text placement",
+        area: "hammer-sickle-label",
+        top: "40%",
+        left: "50%",
+        width: "20%",
+        height: "20%",
+        description: "The giant hammer and sickle symbol dominates Soviet territory, visually overriding individual country names and drawing all attention to the central threat, while Western countries are labeled discretely and formally."
+    },
+    {
+        principle: "symbolization",
+        area: "visual-cue-region",
+        top: "15%",
+        left: "60%",
+        width: "20%",
+        height: "25%",
+        description: "Military-style hatching and directional shading evoke expansion or influence emanating from the USSR. The use of a large communist emblem reinforces symbolic threat over geographic detail."
+    },
+    {
+        principle: "generalization",
+        area: "broad-zones",
+        top: "18%",
+        left: "15%",
+        width: "30%",
+        height: "35%",
+        description: "Countries are grouped into sweeping color-coded areas, flattening political nuance and ignoring local diversity in favor of a clean East-West binary. Subtleties of allegiance or independence are erased."
+    }
+];
+
+
+
+
 
     // Global testmode flag
     let testmode = false;
@@ -242,44 +553,94 @@
         document.getElementById('part2').style.display = 'none';
         document.getElementById('part3').style.display = 'block';
 
-        // Activate only the correctly selected principles
-        activePrinciples = selectedWords.filter(word => correctPrinciples.includes(word));
+        // If no principles have been selected (e.g. started from menu), use the first 3 correct principles
+        if (!activePrinciples || activePrinciples.length === 0) {
+            activePrinciples = correctPrinciples.slice(0, 1);
+        }
+
         if (activePrinciples.length === 0) {
             alert("No principles were selected correctly. Part 3 cannot be started.");
             document.getElementById('menu').style.display = 'block';
             return;
         }
 
+        currentPrincipleIndex = 0;
+        currentMapIndex = 0;
         loadPrincipleStage();
     }
 
-    function loadPrincipleStage() {
-        if (currentPrincipleIndex >= activePrinciples.length) {
-            alert("You have completed all stages!");
+    function startPart4() {
+        // Use the first 3 correct principles for this part
+        activePrinciples = correctPrinciples.slice(0, 3);
+        document.getElementById('menu').style.display = 'none';
+        document.getElementById('part3').style.display = 'block';
+        showTwoWorldsPrincipleDiscovery(activePrinciples, function() {
             document.getElementById('part3').style.display = 'none';
             document.getElementById('menu').style.display = 'block';
-            return;
-        }
-
-        const principle = activePrinciples[currentPrincipleIndex];
-        const maps = mapsPerPrinciple[principle];
-
-        if (currentMapIndex >= maps.length) {
-            currentPrincipleIndex++;
-            currentMapIndex = 0;
-            loadPrincipleStage();
-            return;
-        }
-
-        const mapElement = document.getElementById('part3Map');
-        mapElement.src = maps[currentMapIndex];
-        document.getElementById('part3Title').textContent = `Stage: ${principle} (Map ${currentMapIndex + 1} of ${maps.length})`;
-
-        // Add specific logic for the "Two Worlds" map
-        if (maps[currentMapIndex] === "maps/Map_Two_Worlds.jpg") {
-            alert("For this map, select the principle in the upper-left corner.");
-        }
+        });
     }
+
+function loadPrincipleStage() {
+    if (currentPrincipleIndex >= activePrinciples.length) {
+        // Show the final principle story first
+        showFinalPrincipleStory(function() {
+            // Then start the Two Worlds map game
+            showTwoWorldsPrincipleDiscovery(activePrinciples, function() {
+                document.getElementById('part3').style.display = 'none';
+                document.getElementById('menu').style.display = 'block';
+            });
+        });
+        updatePrincipleList();
+        return;
+    }
+
+    const principle = activePrinciples[currentPrincipleIndex];
+    const maps = mapsPerPrinciple[principle];
+
+    if (currentMapIndex >= maps.length) {
+        currentMapIndex = 0; // Reset BEFORE showing the popup
+        showPrincipleStoryInput(principle, function(reflection) {
+            // Optionally store the reflection here
+            currentPrincipleIndex++;
+            loadPrincipleStage();
+        });
+        return;
+    }
+
+    const mapElement = document.getElementById('part3Map');
+    const mapOverlay = document.getElementById('mapOverlay');
+    mapElement.src = maps[currentMapIndex];
+    document.getElementById('part3Title').textContent = `Stage: ${principle} (Map ${currentMapIndex + 1} of ${maps.length})`;
+
+    // --- Dynamic overlay logic ---
+    // Remove previous overlays
+    mapOverlay.innerHTML = "";
+    const overlays = mapOverlays[maps[currentMapIndex]];
+    if (overlays) {
+        overlays.forEach(overlay => {
+            const div = document.createElement('div');
+            div.className = 'map-overlay-area';
+            div.style.top = overlay.top;
+            div.style.left = overlay.left;
+            div.style.width = overlay.width;
+            div.style.height = overlay.height;
+            div.onclick = function() {
+                // Remove highlight from all overlays first
+                Array.from(mapOverlay.children).forEach(child => child.classList.remove('overlay-visible'));
+                // Add highlight to this overlay
+                div.classList.add('overlay-visible');
+                selectMapPart(overlay.area, overlay.description);
+            };
+            mapOverlay.appendChild(div);
+        });
+    }
+    // ----------------------------
+
+    // Add specific logic for the "Two Worlds" map
+    if (maps[currentMapIndex] === "maps/Map_Two_Worlds.jpg") {
+        alert("For this map, select the principle in the upper-left corner.");
+    }
+}
 
     function updateMap() {
         const mapElement = document.getElementById('map');
@@ -385,37 +746,65 @@
     
     }
 
-function closeModal() {
-    const storyModal = document.getElementById('storyModal');
-    storyModal.style.display = 'none';
+    function closeModal() {
+        const storyModal = document.getElementById('storyModal');
+        storyModal.style.display = 'none';
 
-    // Show choices and map again if still in part1 and not finished
-    if (document.getElementById('part1').style.display !== 'none' && currentMapIndex < maps.length - 1) {
-        document.querySelector('.choices').style.display = 'block';
-        document.querySelector('.map-container').style.display = 'block';
-        currentMapIndex++;
-        updateMap();
-    } else {
-        // End of Part 1, proceed to Part 2
-        document.getElementById('part1').style.display = 'none';
-        document.getElementById('suspicionBarContainer').style.display = 'none';
-        document.getElementById('part2').style.display = 'block';
-    }
-}
-
-    function selectMapPart() {
-        const mapElement = document.getElementById('part3Map');
-        const currentMap = mapElement.src;
-
-        // Check if the user is selecting the correct part of the map
-        if (currentMap.includes("Map_Two_Worlds.jpg")) {
-            alert("You selected the principle in the upper-left corner. Proceeding to the next map...");
+        // Show choices and map again if still in part1 and not finished
+        if (document.getElementById('part1').style.display !== 'none' && currentMapIndex < maps.length - 1) {
+            document.querySelector('.choices').style.display = 'block';
+            document.querySelector('.map-container').style.display = 'block';
+            currentMapIndex++;
+            updateMap();
         } else {
-            alert("You selected a part of the map. Proceeding to the next map...");
+            // End of Part 1, proceed to Part 2
+            document.getElementById('part1').style.display = 'none';
+            document.getElementById('suspicionBarContainer').style.display = 'none';
+            document.getElementById('part2').style.display = 'block';
         }
+    }
 
-        currentMapIndex++;
-        loadPrincipleStage();
+    function selectMapPart(area, description) {
+        if (description) {
+            showOverlayDescription(description, function() {
+                currentMapIndex++;
+                const principle = activePrinciples[currentPrincipleIndex];
+                const maps = mapsPerPrinciple[principle];
+                if (currentMapIndex >= maps.length) {
+                    // Finished all maps for this principle, show story input
+                    showPrincipleStoryInput(principle, function(reflection) {
+                        if (!completedPrinciples.includes(principle)) {
+                            completedPrinciples.push(principle);
+                            updatePrincipleBadges();
+                        }
+                        currentPrincipleIndex++;
+                        currentMapIndex = 0;
+                        loadPrincipleStage();
+                    });
+                } else {
+                    loadPrincipleStage();
+                }
+            });
+        } else {
+            showOverlayDescription("No description available for this area.", function() {
+                currentMapIndex++;
+                const principle = activePrinciples[currentPrincipleIndex];
+                const maps = mapsPerPrinciple[principle];
+                if (currentMapIndex >= maps.length) {
+                    showPrincipleStoryInput(principle, function(reflection) {
+                        if (!completedPrinciples.includes(principle)) {
+                            completedPrinciples.push(principle);
+                            updatePrincipleBadges();
+                        }
+                        currentPrincipleIndex++;
+                        currentMapIndex = 0;
+                        loadPrincipleStage();
+                    });
+                } else {
+                    loadPrincipleStage();
+                }
+            });
+        }
     }
 
     // Highlight words in Part 2
@@ -440,74 +829,150 @@ document.getElementById('highlightableText').addEventListener('click', function 
     }
 });
 
-    function finishGame() {
-        const correctSelections = selectedWords.filter(word => correctPrinciples.includes(word));
-        const incorrectSelections = selectedWords.filter(word => !correctPrinciples.includes(word));
-        const score = correctSelections.length - incorrectSelections.length;
+function finishGame() {
+    const correctSelections = selectedWords.filter(word => correctPrinciples.includes(word));
+    const incorrectSelections = selectedWords.filter(word => !correctPrinciples.includes(word));
+    // Remove duplicates for display
+    const uniqueCorrect = [...new Set(correctSelections)];
+    const uniqueIncorrect = [...new Set(incorrectSelections)];
+    const totalCorrect = correctPrinciples.length;
+    const numCorrect = uniqueCorrect.length;
+    const numIncorrect = uniqueIncorrect.length;
 
-        const scoreText = document.getElementById('scoreText');
-        scoreText.innerHTML = `
-            Correct Selections: ${correctSelections.join(", ")}<br>
-            Incorrect Selections: ${incorrectSelections.join(", ")}<br>
-            Final Score: ${score}
-        `;
+    const scoreText = document.getElementById('scoreText');
+    const summaryHtml = `
+        <div style="margin-bottom:1em;">
+            As Leona turned the final page, the weight of what she had read settled in.<br>
+            The distortions, the choices, the quiet manipulations—none of it was accidental.<br>
+            For the first time, the maps at <em>The Sentinel</em> seemed less like truth... and more like tools.<br>
+            She saw them clearly now—not as windows to the world, but as carefully drawn arguments.<br>
+            And with that clarity, the pieces began to fall into place.<br><br>
+            She reached for her notebook and began to write:
+        </div>
+        <ul style="text-align:left;max-width:400px;margin:1em auto;">
+            ${uniqueCorrect.map(p => `<li>${p.toLowerCase()}</li>`).join('')}
+        </ul>
+        ${numIncorrect > 0 ? `
+        <p>Incorrect Selections:</p>
+        <ul style="text-align:left;max-width:400px;margin:1em auto;">
+            ${uniqueIncorrect.map(p => `<li>${p.toLowerCase()}</li>`).join('')}
+        </ul>
+        ` : ''}
+        <div style="margin-bottom:1em;">
+            Correct principles selected: ${numCorrect} / ${totalCorrect}<br>
+            Incorrect selections: ${numIncorrect}
+        </div>
+    `;
 
-        const scoreModal = document.getElementById('scoreModal');
-        scoreModal.style.display = 'flex';
-
-        // Automatically start Part 3 if there are correctly selected principles
-        if (correctSelections.length > 0) {
-            setTimeout(() => {
-                closeScoreModal();
-                startPart3();
-            }, 2000); // Wait 2 seconds before transitioning to Part 3
-        } else {
-            alert("No correct principles selected. Returning to the menu.");
-            document.getElementById('menu').style.display = 'block';
-        }
+    if (typeof testmode !== "undefined" && testmode) {
+        scoreText.innerHTML = summaryHtml;
+    } else {
+        typewriterEffect(scoreText, summaryHtml);
     }
 
-    function closeScoreModal() {
-        const scoreModal = document.getElementById('scoreModal');
-        scoreModal.style.display = 'none';
+    const scoreModal = document.getElementById('scoreModal');
+    scoreModal.style.display = 'flex';
+}
+
+function closeScoreModal() {
+    const scoreModal = document.getElementById('scoreModal');
+    scoreModal.style.display = 'none';
+
+    // Only allow selection if there are at least 3 correct principles
+    const correctSelections = selectedWords.filter(word => correctPrinciples.includes(word));
+    const uniqueCorrect = [...new Set(correctSelections)];
+
+    if (uniqueCorrect.length > 3) {
+        showPrincipleSelectionModal(uniqueCorrect);
+    } else if (uniqueCorrect.length > 0) {
+        // Show intro text, then continue automatically
+        showPrincipleAutoIntro(uniqueCorrect);
+    } else {
+        // If not enough, show a message or return to menu
+        alert("You need at least 1 correct principle to continue.");
+        document.getElementById('menu').style.display = 'block';
     }
+}
+
+// Helper for auto-selection intro
+function showPrincipleAutoIntro(principles) {
+    // Remove any existing modal
+    let oldModal = document.getElementById('principleSelectionModal');
+    if (oldModal) oldModal.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'principleSelectionModal';
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width:500px;">
+            <p>
+                Leona ran her finger slowly down the list she had compiled. Each principle revealed a different way maps could shape belief—some subtle, some bold. She knew she couldn’t explore them all at once.<br><br>
+                For now, she would focus on the ones that stood out the most.<br><br>
+                <strong>Leona will examine these principle${principles.length > 1 ? 's' : ''} more closely:</strong>
+           <ul style="text-align:left; margin:1em 0;">
+                ${principles.map(p => `<li>${p.toLowerCase()}</li>`).join('')}
+            </ul>
+            <button id="confirmPrinciplesBtn">OK</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    modal.style.display = "flex";
+
+    document.getElementById('confirmPrinciplesBtn').onclick = function() {
+        activePrinciples = principles;
+        modal.remove();
+        startPart3();
+    };
+}
 
     function loadPrincipleStage() {
         if (currentPrincipleIndex >= activePrinciples.length) {
-            alert("You have completed all stages!");
-            document.getElementById('part3').style.display = 'none';
-            document.getElementById('menu').style.display = 'block';
-            return;
-        }
+        // Instead of alert, show the final principle story, then continue with the Two Worlds map
+        showFinalPrincipleStory(function() {
+            showTwoWorldsPrincipleDiscovery(activePrinciples, function() {
+                document.getElementById('part3').style.display = 'none';
+                document.getElementById('menu').style.display = 'block';
+            });
+        });
+        updatePrincipleList();
+        return;
+        }  
 
         const principle = activePrinciples[currentPrincipleIndex];
         const maps = mapsPerPrinciple[principle];
 
-        if (currentMapIndex >= maps.length) {
-            currentPrincipleIndex++;
-            currentMapIndex = 0;
-            loadPrincipleStage();
-            return;
-        }
-
         const mapElement = document.getElementById('part3Map');
+        const mapOverlay = document.getElementById('mapOverlay');
         mapElement.src = maps[currentMapIndex];
         document.getElementById('part3Title').textContent = `Stage: ${principle} (Map ${currentMapIndex + 1} of ${maps.length})`;
+
+        // --- Dynamic overlay logic ---
+        // Remove previous overlays
+        mapOverlay.innerHTML = "";
+        const overlays = mapOverlays[maps[currentMapIndex]];
+        if (overlays) {
+            overlays.forEach(overlay => {
+                const div = document.createElement('div');
+                div.className = 'map-overlay-area';
+                div.style.top = overlay.top;
+                div.style.left = overlay.left;
+                div.style.width = overlay.width;
+                div.style.height = overlay.height;
+                div.onclick = function() {
+                    // Remove highlight from all overlays first
+                    Array.from(mapOverlay.children).forEach(child => child.classList.remove('overlay-visible'));
+                    // Add highlight to this overlay
+                    div.classList.add('overlay-visible');
+                    selectMapPart(overlay.area, overlay.description);
+                };
+                mapOverlay.appendChild(div);
+            });
+        }
+        // ----------------------------
 
         // Add specific logic for the "Two Worlds" map
         if (maps[currentMapIndex] === "maps/Map_Two_Worlds.jpg") {
             alert("For this map, select the principle in the upper-left corner.");
-        }
-    }
-
-    function selectMapPart(area) {
-        const mapElement = document.getElementById('part3Map');
-        const currentMap = mapElement.src;
-
-        if (currentMap.includes("Map_Two_Worlds.jpg") && area === "upper-left") {
-            alert("Correct! You selected the principle in the upper-left corner.");
-        } else {
-            alert("Incorrect selection. Try again.");
         }
     }
 
@@ -867,6 +1332,23 @@ function returnToMenu() {
     if (choices) choices.style.display = 'block';
     const mapContainer = document.querySelector('.map-container');
     if (mapContainer) mapContainer.style.display = 'block';
+
+    updatePrincipleBadges();
+
+        const allPrinciples = [
+        "projection",
+        "symbolization",
+        "generalization",
+        "classification",
+        "Scale",
+        "Framing and orientation",
+        "Labeling and text placement",
+        "colour"
+    ];
+    const allCollected = allPrinciples.every(p => completedPrinciples.includes(p));
+    if (allCollected && !document.getElementById('thankYouPopup')) {
+        setTimeout(showThankYouPopup, 400); // slight delay for menu to appear
+    }
 }
 
 // Map image enlarge popup logic
@@ -951,8 +1433,7 @@ function showPart2IntroPopup() {
                 img: "images/library.jpg",
                 alt: "Library"
             },
-
-                        {
+            {
                 text: `Leona wandered through the dim stacks, her fingers trailing along cracked spines and dust-coated covers. Most titles were dry records—atlases, charts, border archives. She was about to give up when a plain linen book caught her eye.<br><br>
                     <em>“The Language of Maps: Power, Practice, and Perception.”</em><br><br>
                     No author, no markings—just a stamp inside: Restricted, 1930. She opened it carefully. The pages spoke of distortion, symbols, silence, and intent.
@@ -1107,7 +1588,7 @@ function showPart2IntroPopup() {
                 showSection(sectionIndex);
             } else {
                 introPopup.remove();
-                document.getElementById('part2').style.display = 'block';
+                showPart2TaskIntroPopup(); // Show the task instructions before showing part2
             }
         };
 
@@ -1115,6 +1596,640 @@ function showPart2IntroPopup() {
         showSection(sectionIndex);
 
     }
+
+    function showPart2TaskIntroPopup() {
+        // Remove any existing popup
+        const oldPopup = document.getElementById('part2TaskIntroPopup');
+        if (oldPopup) oldPopup.remove();
+
+        // Create the popup overlay
+        const popup = document.createElement('div');
+        popup.id = 'part2TaskIntroPopup';
+        popup.className = 'modal';
+        popup.innerHTML = `
+            <div class="popup-content" style="max-width: 500px;">
+                <p>
+                    Leona had discovered an old book tucked away in the restricted section of the library.
+                    <br>
+                    Its pages explored how maps could shape perception and influence belief. Hidden throughout the text were key cartographic principles—subtle techniques used to guide interpretation and support a message.
+                    <br><br>
+                    <em>Help Leona read carefully. Click on the concepts that revealed the mapmaker’s tools.</em>
+                </p>
+                <button id="part2TaskIntroOkBtn">OK</button>
+            </div> 
+        `;
+        document.body.appendChild(popup);
+        popup.style.display = "flex";
+
+        document.getElementById('part2TaskIntroOkBtn').onclick = function() {
+            popup.remove();
+            document.getElementById('part2').style.display = 'block';
+        };
+    }
+
+    function showPrincipleSelectionModal(correctPrinciplesSelected) {
+    // Remove any existing modal
+    let oldModal = document.getElementById('principleSelectionModal');
+    if (oldModal) oldModal.remove();
+
+    // Create modal
+    const modal = document.createElement('div');
+    modal.id = 'principleSelectionModal';
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width:500px;">
+            <p>
+                Leona ran her finger slowly down the list she had compiled. Each principle revealed a different way maps could shape belief—some subtle, some bold. She knew she couldn’t explore them all at once.<br><br>
+                For now, she would focus on the ones that stood out the most.<br><br>
+                <strong>Select three principles Leona will examine more closely.</strong>
+            </p>
+            <form id="principleSelectionForm" style="text-align:left; margin:1em 0;">
+                ${correctPrinciplesSelected.map((p, i) => `
+                    <label style="display:block; margin-bottom:0.5em;">
+                        <input type="checkbox" name="principle" value="${p}"> ${p}
+                    </label>
+                `).join('')}
+            </form>
+            <button id="confirmPrinciplesBtn" disabled>Confirm Selection</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    modal.style.display = "flex";
+
+    // Checkbox logic: enable button only if 3 are checked
+    const form = document.getElementById('principleSelectionForm');
+    const btn = document.getElementById('confirmPrinciplesBtn');
+    form.addEventListener('change', function() {
+        const checked = form.querySelectorAll('input[type="checkbox"]:checked');
+        btn.disabled = checked.length !== 3;
+    });
+
+    btn.onclick = function() {
+        const checked = Array.from(form.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+        // Save the selected principles for the next stage
+        activePrinciples = checked;
+        modal.remove();
+        startPart3();
+    };
+}
+
+// Show overlay description in a modal popup with typewriter effect
+function showOverlayDescription(description, callback) {
+    // Remove any existing popup
+    let oldPopup = document.getElementById('overlayDescriptionPopup');
+    if (oldPopup) oldPopup.remove();
+
+    // Create the popup overlay
+    const popup = document.createElement('div');
+    popup.id = 'overlayDescriptionPopup';
+    popup.className = '';
+    popup.style.position = 'fixed';
+    popup.style.top = '50%';
+    popup.style.left = '50%';
+    popup.style.transform = 'translate(-50%, -50%)';
+    popup.style.zIndex = '3000';
+    popup.style.display = 'flex';
+    popup.style.alignItems = 'center';
+    popup.style.justifyContent = 'center';
+    popup.style.background = 'none'; // No background
+    popup.innerHTML = `
+        <div class="popup-content" style="max-width: 500px;">
+            <div id="overlayDescriptionText"></div>
+            <button id="overlayDescriptionOkBtn" style="display:none;">OK</button>
+        </div>
+    `;
+    document.body.appendChild(popup);
+
+    const textTarget = document.getElementById('overlayDescriptionText');
+    const okBtn = document.getElementById('overlayDescriptionOkBtn');
+
+    if (typeof testmode !== "undefined" && testmode) {
+        textTarget.innerHTML = description;
+        okBtn.style.display = "inline-block";
+    } else {
+        let localAbort = false;
+        popup.onclick = function(e) {
+            if (!e.target.closest('button')) {
+                localAbort = true;
+            }
+        };
+
+        // Typewriter effect with abort support
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = description;
+        const plain = tempDiv.textContent || tempDiv.innerText || "";
+        textTarget.textContent = "";
+        let i = 0;
+
+        function type() {
+            if (localAbort) {
+                textTarget.innerHTML = description;
+                okBtn.style.display = "inline-block";
+                popup.onclick = null;
+                return;
+            }
+            if (i < plain.length) {
+                textTarget.textContent += plain.charAt(i);
+                i++;
+                setTimeout(type, 18);
+            } else {
+                textTarget.innerHTML = description;
+                okBtn.style.display = "inline-block";
+                popup.onclick = null;
+            }
+        }
+        type();
+    }
+
+    okBtn.onclick = function() {
+        popup.remove();
+        if (callback) callback();
+    };
+}
+
+function showPrincipleStoryInput(principle, onContinue) {
+    // Remove any existing popup
+    let oldPopup = document.getElementById('principleStoryInputPopup');
+    if (oldPopup) oldPopup.remove();
+
+    // Get the story snippet for this principle, or a default
+    const story = principleStorySnippets[principle] ||
+        "How did the maps use this principle to shape meaning? What stood out to you?";
+
+    const popup = document.createElement('div');
+    popup.id = 'principleStoryInputPopup';
+    popup.className = '';
+    popup.style.position = 'fixed';
+    popup.style.top = '50%';
+    popup.style.left = '50%';
+    popup.style.transform = 'translate(-50%, -50%)';
+    popup.style.zIndex = '3000';
+    popup.style.display = 'flex';
+    popup.style.alignItems = 'center';
+    popup.style.justifyContent = 'center';
+    popup.style.background = 'none';
+    popup.innerHTML = `
+        <div class="popup-content" style="max-width: 500px;">
+            <div style="margin-bottom:1em;">
+                <strong>${principle}:</strong><br>
+                <span style="font-size:0.95em;" id="principleStoryText"></span>
+            </div>
+            <button id="principleStoryContinueBtn">Continue</button>
+        </div>
+    `;
+    document.body.appendChild(popup);
+
+    // Use typewriter effect with abort support
+    const storyTarget = document.getElementById('principleStoryText');
+    let localAbort = false;
+    popup.onclick = function(e) {
+        if (!e.target.closest('button')) {
+            localAbort = true;
+        }
+    };
+
+    if (typeof testmode !== "undefined" && testmode) {
+        storyTarget.innerHTML = story;
+    } else {
+        // Typewriter effect with abort
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = story;
+        const plain = tempDiv.textContent || tempDiv.innerText || "";
+        storyTarget.textContent = "";
+        let i = 0;
+
+        function type() {
+            if (localAbort) {
+                storyTarget.innerHTML = story;
+                popup.onclick = null;
+                return;
+            }
+            if (i < plain.length) {
+                storyTarget.textContent += plain.charAt(i);
+                i++;
+                setTimeout(type, 18);
+            } else {
+                storyTarget.innerHTML = story;
+                popup.onclick = null;
+            }
+        }
+        type();
+    }
+
+    document.getElementById('principleStoryContinueBtn').onclick = function() {
+        popup.remove();
+        if (onContinue) onContinue();
+    };
+}
+
+function showFinalPrincipleStory(callback) {
+    // Remove any existing popup
+    let oldPopup = document.getElementById('finalPrincipleStoryPopup');
+    if (oldPopup) oldPopup.remove();
+
+    const story = `
+        Leona closed the last book with a quiet thud, her fingers briefly resting on its worn cover. The library's silence had become familiar, almost comforting—but her time there was done. She stood, tucked the notes into her coat pocket, and stepped back into the gray light of the afternoon.
+        Back at the office, the murmur of typewriters and distant voices returned. She sat down, the same map lying on her desk: Two Worlds. It had confused her before—seemed so blunt, so loud. But now, her eyes scanned differently. The projection, the colors, the rigid divisions—they weren’t just design choices. They were arguments.
+        She leaned in, slowly, and for the first time, she saw what the map was trying to say. And what it was trying to hide.
+    `;
+
+    const popup = document.createElement('div');
+    popup.id = 'finalPrincipleStoryPopup';
+    popup.className = '';
+    popup.style.position = 'fixed';
+    popup.style.top = '50%';
+    popup.style.left = '50%';
+    popup.style.transform = 'translate(-50%, -50%)';
+    popup.style.zIndex = '3000';
+    popup.style.display = 'flex';
+    popup.style.alignItems = 'center';
+    popup.style.justifyContent = 'center';
+    popup.style.background = 'none';
+    popup.innerHTML = `
+        <div class="popup-content" style="max-width: 500px; text-align: center;">
+            <img src="images/backinoffice.jpg" alt="Back in the office" style="max-width:220px;border-radius:8px;margin-bottom:1em;">
+            <div id="finalPrincipleStoryText" style="margin-bottom:1em;"></div>
+            <button id="finalPrincipleStoryContinueBtn" style="display:none;">Finish</button>
+        </div>
+    `;
+    document.body.appendChild(popup);
+
+    const storyTarget = document.getElementById('finalPrincipleStoryText');
+    const finishBtn = document.getElementById('finalPrincipleStoryContinueBtn');
+
+    if (typeof testmode !== "undefined" && testmode) {
+        storyTarget.innerHTML = story;
+        finishBtn.style.display = "inline-block";
+    } else {
+        let localAbort = false;
+        popup.onclick = function(e) {
+            if (!e.target.closest('button')) {
+                localAbort = true;
+            }
+        };
+
+        // Typewriter effect with abort support
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = story;
+        const plain = tempDiv.textContent || tempDiv.innerText || "";
+        storyTarget.textContent = "";
+        let i = 0;
+
+        function type() {
+            if (localAbort) {
+                storyTarget.innerHTML = story;
+                finishBtn.style.display = "inline-block";
+                popup.onclick = null;
+                return;
+            }
+            if (i < plain.length) {
+                storyTarget.textContent += plain.charAt(i);
+                i++;
+                setTimeout(type, 18);
+            } else {
+                storyTarget.innerHTML = story;
+                finishBtn.style.display = "inline-block";
+                popup.onclick = null;
+            }
+        }
+        type();
+    }
+
+    finishBtn.onclick = function() {
+        popup.remove();
+        if (callback) callback();
+    };
+}
+
+function showTwoWorldsPrincipleDiscovery(activePrinciples, onFinish) {
+    document.getElementById('menu').style.display = 'none';
+    document.getElementById('part3').style.display = 'block';
+
+    const mapElement = document.getElementById('part3Map');
+    mapElement.src = "maps/Map_Two Worlds_lowerQuality.png";
+    document.getElementById('part3Title').textContent = `Final Challenge: Find All Principles`;
+
+    const mapOverlay = document.getElementById('mapOverlay');
+    mapOverlay.innerHTML = "";
+
+    // Only overlays for activePrinciples
+    const overlaysToShow = twoWorldsMapOverlays.filter(overlay =>
+        activePrinciples.includes(overlay.principle)
+    );
+
+    // Track found principles
+    let foundPrinciples = new Set();
+    updatePrincipleList(foundPrinciples);
+
+    overlaysToShow.forEach((overlay) => {
+        const div = document.createElement('div');
+        div.className = 'map-overlay-area';
+        div.style.top = overlay.top;
+        div.style.left = overlay.left;
+        div.style.width = overlay.width;
+        div.style.height = overlay.height;
+        div.title = overlay.principle;
+
+        div.onclick = function(e) {
+            if (div.classList.contains('overlay-visible')) return;
+            div.classList.add('overlay-visible');
+            foundPrinciples.add(overlay.principle);
+
+            // Update the principle list to mark found
+            updatePrincipleList(foundPrinciples);
+
+            showOverlayDescription(
+                `<strong>${overlay.principle}</strong><br>${overlay.description}`,
+                function() {
+                    if (foundPrinciples.size === activePrinciples.length) {
+                        showFinalDiscoveryPopup(onFinish);
+                    }
+                }
+            );
+            e.stopPropagation();
+        };
+        mapOverlay.appendChild(div);
+    });
+}
+
+// Show a popup when all principles are found
+function showFinalDiscoveryPopup(callback) {
+    let oldPopup = document.getElementById('finalDiscoveryPopup');
+    if (oldPopup) oldPopup.remove();
+
+    const popup = document.createElement('div');
+    popup.id = 'finalDiscoveryPopup';
+    popup.className = '';
+    popup.style.position = 'fixed';
+    popup.style.top = '50%';
+    popup.style.left = '50%';
+    popup.style.transform = 'translate(-50%, -50%)';
+    popup.style.zIndex = '3000';
+    popup.style.display = 'flex';
+    popup.style.alignItems = 'center';
+    popup.style.justifyContent = 'center';
+    popup.style.background = 'none';
+    popup.innerHTML = `
+        <div class="popup-content" style="max-width: 500px;">
+            <div style="margin-bottom:1em;">
+                <strong>Congratulations!</strong><br>
+                You have found all the principles on the map.<br>
+                Leona finally sees the full picture.
+            </div>
+            <button id="finalDiscoveryOkBtn">Finish</button>
+        </div>
+    `;
+    document.body.appendChild(popup);
+
+    document.getElementById('finalDiscoveryOkBtn').onclick = function() {
+        popup.remove();
+        showLeonaConfrontsBoss(function() {
+            document.getElementById('part3').style.display = 'none';
+            document.getElementById('menu').style.display = 'block';
+                // Add all activePrinciples to completedPrinciples
+            activePrinciples.forEach(p => {
+                if (!completedPrinciples.includes(p)) {
+                    completedPrinciples.push(p);
+                }
+            });
+            updatePrincipleBadges();
+        });
+    };
+}
+function updatePrincipleList(foundPrinciples = new Set()) {
+    const listDiv = document.getElementById('principleList');
+    if (!listDiv) return;
+    if (activePrinciples && activePrinciples.length > 0) {
+        listDiv.innerHTML = activePrinciples.map(p =>
+            `<span class="principle-tag${foundPrinciples.has(p) ? ' principle-found' : ''}">
+                ${p}${foundPrinciples.has(p) ? ' &#10003;' : ''}
+            </span>`
+        ).join(' ');
+    } else {
+        listDiv.innerHTML = '';
+    }
+}
+
+function showLeonaConfrontsBoss(callback) {
+    // Remove any existing popup
+    let oldPopup = document.getElementById('leonaBossPopup');
+    if (oldPopup) oldPopup.remove();
+
+    const story = `
+        Leona stood in the center of the editor’s office, the final map still fresh in her mind. The hammer and sickle loomed across Eurasia in her memory—not just as a threat, but as a construction. A deliberate choice. A symbol wielded like a weapon.
+        “I’ve finished reviewing the full set,” she said calmly, her voice carrying a quiet defiance. “Every curve, every label, every splash of red—these aren’t just maps. They’re stories shaped to make people feel surrounded, afraid, obedient. It’s not analysis—it’s choreography.”
+        The editor didn’t look up from his desk. “Your job wasn’t to question the message. It was to sharpen it.”
+        “But that’s the problem,” Leona replied. “We’re not mapping the world—we’re building cages in people’s minds.”
+        He sighed. “So you’ve made your choice.”
+        “Yes,” she said, standing straighter. “I’m done helping draw borders that were never meant to be crossed.”
+        “You’re dismissed. Effective immediately.”
+        The words stung less than she expected. As she left the building, she didn’t look back. The city outside hadn’t changed—but she had. Each line on those maps, each color-coded lie, had taught her not just how persuasion worked—but how to resist it.
+        And now, for the first time, she knew exactly which side of the line she stood on.
+        `;
+
+    const popup = document.createElement('div');
+    popup.id = 'leonaBossPopup';
+    popup.className = '';
+    popup.style.position = 'fixed';
+    popup.style.top = '50%';
+    popup.style.left = '50%';
+    popup.style.transform = 'translate(-50%, -50%)';
+    popup.style.zIndex = '3000';
+    popup.style.display = 'flex';
+    popup.style.alignItems = 'center';
+    popup.style.justifyContent = 'center';
+    popup.style.background = 'none';
+    popup.innerHTML = `
+        <div class="popup-content" style="max-width: 500px; text-align: center;">
+            <img src="images/confrontation.jpg" alt="Leona confronts boss" style="max-width:220px;border-radius:8px;margin-bottom:1em;">
+            <div id="leonaBossStoryText" style="margin-bottom:1em;"></div>
+            <button id="leonaBossFinishBtn" style="display:none;">Finish Game</button>
+        </div>
+    `;
+    document.body.appendChild(popup);
+
+    const storyTarget = document.getElementById('leonaBossStoryText');
+    const finishBtn = document.getElementById('leonaBossFinishBtn');
+
+    if (typeof testmode !== "undefined" && testmode) {
+        storyTarget.innerHTML = story;
+        finishBtn.style.display = "inline-block";
+    } else {
+        let localAbort = false;
+        popup.onclick = function(e) {
+            if (!e.target.closest('button')) {
+                localAbort = true;
+            }
+        };
+
+        // Typewriter effect with abort support
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = story;
+        const plain = tempDiv.textContent || tempDiv.innerText || "";
+        storyTarget.textContent = "";
+        let i = 0;
+
+        function type() {
+            if (localAbort) {
+                storyTarget.innerHTML = story;
+                finishBtn.style.display = "inline-block";
+                popup.onclick = null;
+                return;
+            }
+            if (i < plain.length) {
+                storyTarget.textContent += plain.charAt(i);
+                i++;
+                setTimeout(type, 18);
+            } else {
+                storyTarget.innerHTML = story;
+                finishBtn.style.display = "inline-block";
+                popup.onclick = null;
+            }
+        }
+        type();
+    }
+
+    finishBtn.onclick = function() {
+        popup.remove();
+        if (callback) callback();
+    };
+}
+
+function updatePrincipleBadges() {
+    const badgeDiv = document.getElementById('principleBadges');
+    if (!badgeDiv) return;
+
+    // List of all possible principles (in the order you want to show them)
+    const allPrinciples = [
+        "projection",
+        "symbolization",
+        "generalization",
+        "classification",
+        "Scale",
+        "Framing and orientation",
+        "Labeling and text placement",
+        "colour"
+    ];
+
+    badgeDiv.innerHTML = allPrinciples.map(p =>
+        completedPrinciples.includes(p)
+            ? (principlesBadges[p]
+                ? `<img class="principle-badge-img" src="${principlesBadges[p]}" alt="${p}" title="${p}">`
+                : `<span class="principle-badge">${p}</span>`)
+            : `<span class="principle-badge-locked" title="Locked"><img src="badges/lock.png" alt="Locked" style="width:32px;height:32px;opacity:0.5;vertical-align:middle;"></span>`
+    ).join(' ');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    updatePrincipleBadges();
+
+    const startBtn = document.getElementById('startGameBtn');
+    if (startBtn) {
+        startBtn.onclick = handleStartGame;
+    }
+
+    const titleScreen = document.getElementById('titleScreen');
+    const menu = document.getElementById('menu');
+    if (titleScreen && menu && startBtn) {
+        startBtn.onclick = function(e) {
+            e.stopPropagation();
+            // Hide the title screen completely
+            titleScreen.style.display = 'none';
+            // Optionally, remove the title screen from the DOM for good measure:
+            // titleScreen.parentNode.removeChild(titleScreen);
+
+            // Hide any overlays or modals that might be open (defensive)
+            document.body.style.overflow = '';
+            document.body.classList.remove('modal-open'); // if you use such a class
+
+            // Show the menu
+            menu.style.display = 'block';
+
+            // Reset and update badges/menu state
+            returnToMenu();
+        };
+    }
+
+
+    const resetBtn = document.getElementById('resetGameBtn');
+    if (resetBtn) {
+        resetBtn.onclick = function(e) {
+            e.stopPropagation();
+            resetGame();
+        };
+    }
+
+    // Add click listener to the map image
+    const mapImg = document.getElementById('map');
+    if (mapImg) {
+        mapImg.onclick = function() {
+            showPart2IntroPopup();
+        };
+    }
+});
+
+function handleStartGame() {
+    // Hide the title screen completely
+    const titleScreen = document.getElementById('titleScreen');
+    if (titleScreen) titleScreen.style.display = 'none';
+
+    // Hide any overlays or modals that might be open (defensive)
+    document.body.style.overflow = '';
+    document.body.classList.remove('modal-open');
+
+    // Show the menu and reset/update state
+    returnToMenu();
+}
+
+function showThankYouPopup() {
+    // Remove any existing popup
+    let oldPopup = document.getElementById('thankYouPopup');
+    if (oldPopup) oldPopup.remove();
+
+    const popup = document.createElement('div');
+    popup.id = 'thankYouPopup';
+    popup.className = 'modal';
+    popup.style.display = 'flex';
+    popup.style.alignItems = 'center';
+    popup.style.justifyContent = 'center';
+    popup.style.position = 'fixed';
+    popup.style.top = '0';
+    popup.style.left = '0';
+    popup.style.width = '100vw';
+    popup.style.height = '100vh';
+    popup.style.zIndex = '5000';
+    popup.style.background = 'rgba(0,0,0,0.7)';
+    popup.innerHTML = `
+        <div class="popup-content" style="max-width: 500px; text-align: center;">
+            <img src="images/gamefinish.jpeg" alt="Leona thanks you" style="max-width:220px;border-radius:8px;margin-bottom:1em;">
+            <h2>You did it. We did it.</h2>
+            <div id="thankYouText" style="margin-bottom:1em;min-height:120px;"></div>
+            <button id="thankYouOkBtn" style="display:none;">OK</button>
+        </div>
+    `;
+    document.body.appendChild(popup);
+
+    const text = `
+        Leona looks up from the last map, the badges glowing softly on the wall behind her.<br><br>
+        "Each one of these... you helped me see what I couldn't before. The way maps speak, persuade, and control.<br>
+        Thank you for walking this path with me.<br>
+        Now I know how to read between the lines—and more importantly, how to resist."<br><br>
+        She smiles.<br>
+        "The world is still divided. But thanks to you, I'm not blind to it anymore."
+    `;
+
+    const textTarget = document.getElementById('thankYouText');
+    const okBtn = document.getElementById('thankYouOkBtn');
+
+    // Use your typewriter effect
+    typewriterEffect(textTarget, text, function() {
+        okBtn.style.display = "inline-block";
+    });
+
+    okBtn.onclick = function() {
+        popup.remove();
+    };
+}
 
 </script>
 </body>

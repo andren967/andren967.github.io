@@ -110,10 +110,20 @@ h1, .special-elite {
     font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif;
 }
 .popup-content button, .modal-content button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    font-size: 16px;
+    background-color: #5a310e;
+    color: #fff;
+    border: 2.5px solid #e2d3b1;
+    border-radius: 6px;
+    padding: 0.3em 1.2em;
+    box-shadow: none;
     cursor: pointer;
+    font-size: 1em;
+    font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif;
+    letter-spacing: 1px;
+    transition: background 0.2s, transform 0.1s;
+    margin-top: 16px;
+    margin-bottom: 8px;
+    outline: none;
 }
 
 /* Only style buttons inside the Part 1 intro popup */
@@ -330,4 +340,189 @@ span.highlighted.correct {
 }
 span.highlighted.incorrect {
     background: rgb(220, 220, 220);
+}
+/* Center the map and button in part3 */
+#part3 .map-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+#part3 .map-container img {
+    max-width: 1200px;
+    max-height: 800px;
+    width: auto;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    object-fit: contain;
+}
+.enlarge-map-btn {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
+#enlargePart3MapBtn {
+    display: block;
+    margin: 1em auto 0 auto;
+}
+
+/* General style for all map overlays */
+.map-overlay-area {
+    position: absolute;
+    border: none;
+    background-color: rgba(0,0,0,0);
+    cursor: pointer;
+    transition: border 0.2s, background 0.2s;
+    z-index: 2;
+}
+/* Highlighted overlay */
+.overlay-visible {
+    border: 3px solid #e2d3b1 !important;
+    background-color: rgba(255, 255, 200, 0.18) !important;
+    box-shadow: 0 0 12px #e2d3b1;
+}
+
+.principle-tag {
+    background-color: #5a310e; /* Brown */
+    color: #fff;
+    border: 2.5px solid #e2d3b1; /* Light border for key edge */
+    border-radius: 6px; /* Sharp, but slightly rounded like a key */
+    padding: 0.3em 1.2em;
+    box-shadow: none; /* No shadow */
+    font-size: 1em;
+    font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif; /* Typewriter font */
+    letter-spacing: 1px;
+    transition: background 0.2s, transform 0.1s;
+    margin-top: 16px;
+    margin-bottom: 8px;
+    outline: none;
+}
+/* Add to your style.css */
+.principle-found {
+    background: #1a7f1a !important;
+    color: #fff !important;
+    border-color: #b6e2b1 !important;
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+#principleBadges {
+    color: #222 !important;
+    font-size: 1.2em !important;
+    background: #fff !important;
+}
+
+.principle-badge-img {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #bfa76a;
+    margin: 0 0.2em 0.2em 0;
+    box-shadow: 0 1px 4px #0002;
+    vertical-align: middle;
+}
+
+.principle-badge-locked {
+    display: inline-block;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    background: #f5f5f5;
+    margin: 0 0.2em 0.2em 0;
+    box-shadow: 0 1px 4px #0001;
+    vertical-align: middle;
+    text-align: center;
+    line-height: 48px;
+}
+
+#titleScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 5000;
+    background: #fffef9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+#titleScreenImg {
+    max-width: 80vw;
+    max-height: 60vh;
+    border-radius: 12px;
+    box-shadow: 0 4px 32px #000;
+}
+
+#startGameBtn {
+    margin-top: 2em;
+    font-size: 1.5em;
+    padding: 0.3em 1.2em;
+    border-radius: 6px;
+    border: 2.5px solid #e2d3b1;
+    background: #5a310e;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 2px 8px #0004;
+    transition: background 0.2s, color 0.2s;
+    font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif;
+    letter-spacing: 1px;
+}
+
+#startGameBtn:hover, #startGameBtn:focus {
+    background: #d1b97a;
+    color: #111;
+}
+
+.main-title {
+    position: relative;
+    font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif;
+    font-size: 3.2em;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.5em;
+    line-height: 1.1;
+    text-align: center;
+    user-select: none;
+    color: #222;
+    text-shadow: 0 1px 0 #fff, 0 2px 8px #0002;
+    border-bottom: 2.5px solid #bfa76a;
+    display: inline-block;
+    background: #fdf6e3;
+    padding: 0.15em 0.5em 0.25em 0.5em;
+    box-shadow: 0 2px 12px #0002;
+}
+.main-title .title-shadow {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    color: #000;
+    opacity: 0.18;
+    filter: blur(2.5px);
+    z-index: 0;
+    pointer-events: none;
+}
+.main-title .title-main {
+    position: relative;
+    color: #222;
+    z-index: 1;
+    letter-spacing: 0.04em;
+    font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif;
+    background: none;
+    text-shadow:
+        0 1px 0 #fff,
+        0 2px 8px #0002;
+}
+.main-title .typewriter-cursor {
+    display: inline-block;
+    width: 0.6em;
+    color: #bfa76a;
+    background: none;
+    animation: blink-cursor 1s steps(1) infinite;
+    font-weight: bold;
+    font-size: 1em;
+    vertical-align: middle;
+    margin-left: 0.1em;
 }
