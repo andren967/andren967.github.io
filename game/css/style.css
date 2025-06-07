@@ -533,7 +533,7 @@ span.highlighted.incorrect {
     margin-left: 0.1em;
 }
 
-#mainStartBtn, #showThankYouBtn, #optionsBtn, #startPrinciplesBtn {
+#mainStartBtn, #showThankYouBtn, #optionsBtn, #startPrinciplesBtn, #finishBtn {
     background: #5a310e;
     color: #fff;
     border: 2.5px solid #e2d3b1;
@@ -546,7 +546,11 @@ span.highlighted.incorrect {
     box-shadow: 0 2px 8px #0002;
     transition: background 0.2s, color 0.2s;
 }
-#mainStartBtn:hover, #mainStartBtn:focus {
+#mainStartBtn:hover, #mainStartBtn:focus,
+#showThankYouBtn:hover, #showThankYouBtn:focus,
+#optionsBtn:hover, #optionsBtn:focus,
+#startPrinciplesBtn:hover, #startPrinciplesBtn:focus,
+#finishBtn:hover, #finishBtn:focus {
     background: #d1b97a;
     color: #111;
 }
