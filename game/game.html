@@ -624,7 +624,7 @@ function loadPrincipleStage() {
     const mapElement = document.getElementById('part3Map');
     const mapOverlay = document.getElementById('mapOverlay');
     mapElement.src = maps[currentMapIndex];
-    document.getElementById('part3Title').textContent = `Stage: ${principle} (Map ${currentMapIndex + 1} of ${maps.length})`;
+    document.getElementById('part3Title').textContent = `Princple: ${principle} (Map ${currentMapIndex + 1} of ${maps.length})`;
 
     // --- Dynamic overlay logic ---
     // Remove previous overlays
@@ -1794,70 +1794,72 @@ function showOverlayDescription(description, callback) {
     `;
     document.body.appendChild(popup);
 
-const headingTarget = document.getElementById('overlayDescriptionHeading');
-const textTarget = document.getElementById('overlayDescriptionText');
-const okBtn = document.getElementById('overlayDescriptionOkBtn');
+    const headingTarget = document.getElementById('overlayDescriptionHeading');
+    const textTarget = document.getElementById('overlayDescriptionText');
+    const okBtn = document.getElementById('overlayDescriptionOkBtn');
 
-// Split the input into heading and description
-let heading = "";
-let descriptionHtml = description;
-const strongMatch = description.match(/^<strong>(.*?)<\/strong><br\s*\/?>/i);
-if (strongMatch) {
-    heading = strongMatch[1];
-    descriptionHtml = description.replace(/^<strong>.*?<\/strong><br\s*\/?>/i, "");
-}
-
-if (typeof testmode !== "undefined" && testmode) {
-    headingTarget.textContent = heading;
-    textTarget.innerHTML = descriptionHtml;
-    okBtn.style.display = "inline-block";
-} else {
-    let localAbort = false;
-    popup.onclick = function(e) {
-        if (!e.target.closest('button')) {
-            localAbort = true;
-        }
-    };
-
-    // Typewriter for heading, then for description
-    function typeHeading(i = 0) {
-        if (localAbort) {
-            headingTarget.textContent = heading;
-            typeDescription(true);
-            return;
-        }
-        if (i < heading.length) {
-            headingTarget.textContent += heading.charAt(i);
-            setTimeout(() => typeHeading(i + 1), 24);
-        } else {
-            typeDescription();
-        }
+    // Split the input into heading and description
+    let heading = "";
+    let descriptionHtml = description;
+    const strongMatch = description.match(/^<strong>(.*?)<\/strong><br\s*\/?>/i);
+    if (strongMatch) {
+        heading = strongMatch[1];
+        descriptionHtml = description.replace(/^<strong>.*?<\/strong><br\s*\/?>/i, "");
     }
 
-    function typeDescription(forceShow = false, j = 0) {
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = descriptionHtml;
-        const plain = tempDiv.textContent || tempDiv.innerText || "";
-        if (forceShow) {
-            textTarget.innerHTML = descriptionHtml;
-            okBtn.style.display = "inline-block";
-            popup.onclick = null;
-            return;
-        }
-        if (j < plain.length) {
-            textTarget.textContent += plain.charAt(j);
-            setTimeout(() => typeDescription(false, j + 1), 18);
-        } else {
-            textTarget.innerHTML = descriptionHtml;
-            okBtn.style.display = "inline-block";
-            popup.onclick = null;
-        }
-    }
+    if (typeof testmode !== "undefined" && testmode) {
+        headingTarget.textContent = heading;
+        textTarget.innerHTML = descriptionHtml;
+        okBtn.style.display = "inline-block";
+    } else {
+        okBtn.style.display = "none";
+        typewriterAbort = false;
+        popup.onclick = function(e) {
+            // Only ignore clicks on a VISIBLE button
+            if (!e.target.closest('button') || okBtn.style.display === "none") {
+                typewriterAbort = true;
+            }
+        };
 
-    headingTarget.textContent = "";
-    textTarget.textContent = "";
-    typeHeading();
-}
+        // Typewriter for heading, then for description
+        function typeHeading(i = 0) {
+            if (typewriterAbort) {
+                headingTarget.textContent = heading;
+                typeDescription(true);
+                return;
+            }
+            if (i < heading.length) {
+                headingTarget.textContent += heading.charAt(i);
+                setTimeout(() => typeHeading(i + 1), 24);
+            } else {
+                typeDescription();
+            }
+        }
+
+        function typeDescription(forceShow = false, j = 0) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = descriptionHtml;
+            const plain = tempDiv.textContent || tempDiv.innerText || "";
+            if (forceShow || typewriterAbort) {
+                textTarget.innerHTML = descriptionHtml;
+                okBtn.style.display = "inline-block";
+                popup.onclick = null;
+                return;
+            }
+            if (j < plain.length) {
+                textTarget.textContent += plain.charAt(j);
+                setTimeout(() => typeDescription(false, j + 1), 18);
+            } else {
+                textTarget.innerHTML = descriptionHtml;
+                okBtn.style.display = "inline-block";
+                popup.onclick = null;
+            }
+        }
+
+        headingTarget.textContent = "";
+        textTarget.textContent = "";
+        typeHeading();
+    }
 
     okBtn.onclick = function() {
         popup.remove();
