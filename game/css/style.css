@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&family=Special+Elite&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
 
-/* General body and headings */
+/* ====== GENERAL LAYOUT & TYPOGRAPHY ====== */
 body {
     font-family: 'Source Sans 3', Arial, sans-serif;
     text-align: center;
@@ -10,82 +10,160 @@ body {
     padding: 0;
     user-select: none;
 }
+/* Use typewriter font for headings and special elements */
 h1, .special-elite {
     font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif;
 }
-
-/* Section 1 background */
-/*#part1 {
-    background: url('../images/desk.png') no-repeat center center fixed;
-    background-size: 1000px auto;
-    min-height: 100vh;
-}*/
-
-/* Popup/modal background with desk image, smaller and subtle */
-#part1IntroPopup,
-.modal {
-    background: rgba(0,0,0,0.6) url('../images/desk.png') no-repeat center center fixed;
-    background-size: 1000px auto;
-    min-height: 100vh;
-    /* The rgba overlay keeps the popup readable */
+/* Ensure consistent font and letter spacing for all text and buttons */
+body, h1, h2, h3, h4, h5, h6, p, .popup-content, .modal-content, .choices button {
+    font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif !important;
+    letter-spacing: 0.5px;
 }
 
-/* Map container and images */
-.map-container {
-    margin: 20px auto;
-    max-width: 600px;
+/* ====== TITLE SCREEN ====== */
+#titleScreen {
+    /* Fullscreen overlay for the game title */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 5000;
+    background: #fffef9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
 }
-.map-container img {
-    max-width: 600px;
-    max-height: 400px;
-    width: auto;
-    height: auto;
-    display: block;
-    margin: 0 auto;
-    object-fit: contain;
+#titleScreenImg {
+    /* Responsive title image */
+    max-width: 80vw;
+    max-height: 60vh;
+    border-radius: 12px;
+    box-shadow: 0 4px 32px #000;
+}
+#startGameBtn {
+    /* Prominent start button */
+    margin-top: 2em;
+    font-size: 1.5em;
+    padding: 0.3em 1.2em;
+    border-radius: 6px;
+    border: 2.5px solid #e2d3b1;
+    background: #5a310e;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 2px 8px #0004;
+    transition: background 0.2s, color 0.2s;
+    font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif;
+    letter-spacing: 1px;
+}
+#startGameBtn:hover, #startGameBtn:focus {
+    background: #d1b97a;
+    color: #111;
 }
 
-/* Choices styling */
-.choices {
-    margin-top: 20px;
+/* ====== MAIN TITLE ====== */
+.main-title {
+    /* Large, styled game title */
+    position: relative;
+    font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif;
+    font-size: 3.2em;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.5em;
+    line-height: 1.1;
+    text-align: center;
+    user-select: none;
+    color: #222;
+    text-shadow: 0 1px 0 #fff, 0 2px 8px #0002;
+    border-bottom: 2.5px solid #bfa76a;
+    display: inline-block;
+    background: #fdf6e3;
+    padding: 0.15em 0.5em 0.25em 0.5em;
+    box-shadow: 0 2px 12px #0002;
+}
+/* Shadow and main text for layered title effect */
+.main-title .title-shadow {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    color: #000;
+    opacity: 0.18;
+    filter: blur(2.5px);
+    z-index: 0;
+    pointer-events: none;
+}
+.main-title .title-main {
+    position: relative;
+    color: #222;
+    z-index: 1;
+    letter-spacing: 0.04em;
+    font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif;
+    background: none;
+    text-shadow:
+        0 1px 0 #fff,
+        0 2px 8px #0002;
+}
+
+/* ====== MAIN MENU BUTTONS ====== */
+#menu {
+    /* Centered vertical menu */
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 0.5em;
+    width: 350px;
+    margin: 0 auto;
 }
-.choices button {
-    margin: 10px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    width: 1500px;
-    background: #fdf6e3;
-    color: #222;
-    border: 1.5px solid #e2d3b1;
-    border-radius: 0;
-    box-shadow: 0 2px 8px #0002, 0 1px 0 #e2d3b1 inset;
+#menu button {
+    display: block;
+    width: 100%;
+    margin: 0.5em 0;
+    text-align: center;
+    box-sizing: border-box;
+}
+/* Main menu and navigation buttons */
+#mainStartBtn, #showThankYouBtn, #optionsBtn, #startPrinciplesBtn, #finishBtn {
+    background: #5a310e;
+    color: #fff;
+    border: 2.5px solid #e2d3b1;
+    border-radius: 8px;
+    font-size: 1.3em;
+    padding: 0.5em 2em;
+    margin-bottom: 1em;
     font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif;
-    font-size: 1.1em;
-    letter-spacing: 0.5px;
-    padding: 0.7em 1.5em;
-    margin: 10px 0;
-    transition: background 0.2s, box-shadow 0.2s;
-    outline: none;
-    text-align: left;
-    background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
-    background-repeat: repeat;
-    background-size: 300px 300px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px #0002;
+    transition: background 0.2s, color 0.2s;
+}
+#mainStartBtn:hover, #mainStartBtn:focus,
+#showThankYouBtn:hover, #showThankYouBtn:focus,
+#optionsBtn:hover, #optionsBtn:focus,
+#startPrinciplesBtn:hover, #startPrinciplesBtn:focus,
+#finishBtn:hover, #finishBtn:focus {
+    background: #d1b97a;
+    color: #111;
 }
 
-/* Result styling */
-.result {
-    margin-top: 20px;
-    font-size: 18px;
-    font-weight: bold;
+/* ====== OPTIONS MENU ====== */
+#optionsMenu {
+    /* Styled options/settings panel */
+    background: #fdf6e3;
+    border: 1.5px solid #e2d3b1;
+    border-radius: 10px;
+    padding: 1em 2em;
+    box-shadow: 0 2px 12px #0001;
+    margin: 0 auto;
+    max-width: 350px;
+}
+#optionsMenu button {
+    display: block;
+    width: 100%;
+    margin: 0.5em 0;
 }
 
-/* Modal and popup styling */
+/* ====== MODALS & POPUPS ====== */
 .modal, #part1IntroPopup {
-    display: none; /* Hidden by default, JS sets to flex */
+    /* Fullscreen overlay for popups */
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
@@ -97,8 +175,9 @@ h1, .special-elite {
     z-index: 1000;
 }
 #part1IntroPopup {
-    display: flex; /* JS will set this when showing */
+    display: flex;
 }
+/* Popup content styling */
 .popup-content, .modal-content {
     background-color: #f3cf99;
     padding: 20px 2em;
@@ -109,6 +188,7 @@ h1, .special-elite {
     box-shadow: 0 2px 16px #0008;
     font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif;
 }
+/* Buttons inside popups */
 .popup-content button, .modal-content button {
     background-color: #5a310e;
     color: #fff;
@@ -125,32 +205,20 @@ h1, .special-elite {
     margin-bottom: 8px;
     outline: none;
 }
-
-/* Only style buttons inside the Part 1 intro popup */
-#part1IntroPopup button,
-.popup-content button {
-    background-color: #5a310e; /* Brown */
-    color: #fff;
-    border: 2.5px solid #e2d3b1; /* Light border for key edge */
-    border-radius: 6px; /* Sharp, but slightly rounded like a key */
-    padding: 0.3em 1.2em;
-    box-shadow: none; /* No shadow */
-    cursor: pointer;
-    font-size: 1em;
-    font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif; /* Typewriter font */
-    letter-spacing: 1px;
-    transition: background 0.2s, transform 0.1s;
-    margin-top: 16px;
-    margin-bottom: 8px;
-    outline: none;
-}
-#part1IntroPopup button:hover,
-.popup-content button:hover {
+.popup-content button:hover, .modal-content button:hover {
     background-color: #6B3F16;
     transform: translateY(1px) scale(0.98);
 }
-
-/* Intro popup image */
+/* Special intro popup background */
+#part1IntroPopup .popup-content {
+    background: #fdf6e3;
+    border-radius: 0;
+    box-shadow: 0 4px 24px 0 #0003, 0 1px 0 #e2d3b1 inset;
+    border: 1.5px solid #e2d3b1;
+    background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+    background-repeat: repeat;
+    background-size: 300px 300px;
+}
 #part1IntroPopup img,
 .popup-content img {
     display: block;
@@ -160,8 +228,58 @@ h1, .special-elite {
     margin: 1em auto;
 }
 
-/* Highlightable text for Part 2 */
-.highlightable-text {
+/* ====== MAP GAME (PART 1) ====== */
+.map-container {
+    margin: 20px auto;
+    max-width: 600px;
+}
+.map-container img {
+    max-width: 600px;
+    max-height: 400px;
+    width: auto;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    object-fit: contain;
+}
+.choices {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+/* Map game answer buttons */
+.choices button {
+    margin: 10px 0;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background: #fdf6e3;
+    color: #222;
+    border: 1.5px solid #e2d3b1;
+    border-radius: 0;
+    box-shadow: 0 2px 8px #0002, 0 1px 0 #e2d3b1 inset;
+    font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif;
+    font-size: 1.1em;
+    letter-spacing: 0.5px;
+    padding: 0.7em 1.5em;
+    transition: background 0.2s, box-shadow 0.2s;
+    outline: none;
+    text-align: left;
+    background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+    background-repeat: repeat;
+    background-size: 300px 300px;
+}
+.result {
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* ====== PART 2: TEXT SELECTION ====== */
+#part2 .highlightable-text {
+    /* Text block for principle selection */
+    font-family: 'Crimson Text', serif !important;
     margin: 20px auto;
     max-width: 600px;
     text-align: left;
@@ -172,63 +290,20 @@ h1, .special-elite {
     cursor: pointer;
     user-select: none;
 }
+/* Highlighted word styles */
 .highlighted {
     background-color: rgb(220, 220, 220);
 }
-
-/* Paper-like popup for Part 1 */
-#part1IntroPopup .popup-content {
-    background: #fdf6e3; /* Light paper color */
-    border-radius: 0; /* Sharp edges */
-    box-shadow: 0 4px 24px 0 #0003, 0 1px 0 #e2d3b1 inset;
-    border: 1.5px solid #e2d3b1;
-    /* Optional: subtle paper texture overlay */
-    background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
-    background-repeat: repeat;
-    background-size: 300px 300px;
+span.highlighted.correct {
+    background: #FFD700 !important;
+}
+span.highlighted.incorrect {
+    background: rgb(220, 220, 220);
 }
 
-/* Boss's message before Part 1 */
-.boss-intro {
-    background-color: rgba(243, 207, 153, 0.9);
-    border: 1px solid #e2d3b1;
-    border-radius: 8px;
-    padding: 20px;
-    margin: 20px auto;
-    max-width: 600px;
-    text-align: left;
-    font-size: 16px;
-    line-height: 1.5;
-    position: relative;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-.boss-intro p {
-    margin: 0 0 10px 0;
-}
-.boss-intro img.boss-image {
-    display: block;
-    margin: 18px auto 0 auto;
-    max-width: 120px;
-    border-radius: 8px;
-    border: 1.5px solid #e2d3b1;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-/* Add to your style.css */
-.intro-image-fade {
-    opacity: 0;
-    transition: opacity 0.8s;
-}
-.intro-image-fade.visible {
-    opacity: 1;
-}
-
-body, h1, h2, h3, h4, h5, h6, p, .special-elite, .popup-content, .modal-content, .choices button {
-    font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif !important;
-    letter-spacing: 0.5px;
-}
-
+/* ====== SUSPICION BAR ====== */
 #suspicionBarContainer {
+    /* Fixed bar for suspicion points */
     position: fixed;
     top: 18px;
     left: 18px;
@@ -241,8 +316,8 @@ body, h1, h2, h3, h4, h5, h6, p, .special-elite, .popup-content, .modal-content,
     box-shadow: 0 2px 8px #0002;
     min-width: 180px;
 }
-
 #suspicionChange {
+    /* Animated suspicion change indicator */
     position: absolute;
     left: 80px;
     top: 80px;
@@ -254,21 +329,19 @@ body, h1, h2, h3, h4, h5, h6, p, .special-elite, .popup-content, .modal-content,
     transition: opacity 0.4s, transform 0.7s;
     z-index: 10;
 }
-
 #suspicionBarContainer label {
     font-size: 1.1em;
     font-weight: bold;
     letter-spacing: 1px;
     color: #5a310e;
 }
-
 .suspicion-bar-bg {
     display: flex;
     align-items: center;
     margin-top: 6px;
 }
-
 #suspicionBar {
+    /* Colored suspicion bar */
     position: relative;
     height: 18px;
     width: 110px;
@@ -286,7 +359,6 @@ body, h1, h2, h3, h4, h5, h6, p, .special-elite, .popup-content, .modal-content,
     height: 100%;
     z-index: 1;
 }
-
 #suspicionValue {
     font-size: 1em;
     color: #5a310e;
@@ -295,8 +367,108 @@ body, h1, h2, h3, h4, h5, h6, p, .special-elite, .popup-content, .modal-content,
     text-align: right;
 }
 
-/* Map enlarge popup styles */
+/* ====== PART 3: PRINCIPLE STAGES ====== */
+#part3 .map-container {
+    /* Layout for principle map stage */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 600px;
+    min-width: 1000px;
+}
+#part3 .map-container img {
+    max-width: 1000px;
+    max-height: 800px;
+    width: auto;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    object-fit: contain;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+.enlarge-map-btn {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
+#enlargePart3MapBtn {
+    display: block;
+    margin: 1em auto 0 auto;
+}
+/* Clickable overlay areas on the map */
+.map-overlay-area {
+    position: absolute;
+    border: none;
+    background-color: rgba(0,0,0,0);
+    cursor: pointer;
+    transition: border 0.2s, background 0.2s;
+    z-index: 2;
+}
+.overlay-visible {
+    border: 3px solid #e2d3b1 !important;
+    background-color: rgba(255, 255, 200, 0.18) !important;
+    box-shadow: 0 0 12px #e2d3b1;
+    pointer-events: none;
+    opacity: 0.6;
+}
+/* Principle tag and badge styles */
+.principle-tag {
+    background-color: #5a310e;
+    color: #fff;
+    border: 2.5px solid #e2d3b1;
+    border-radius: 6px;
+    padding: 0.3em 1.2em;
+    box-shadow: none;
+    font-size: 1em;
+    font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif;
+    letter-spacing: 1px;
+    transition: background 0.2s, transform 0.1s;
+    margin-top: 16px;
+    margin-bottom: 8px;
+    outline: none;
+}
+.principle-found {
+    background: #1a7f1a !important;
+    color: #fff !important;
+    border-color: #b6e2b1 !important;
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+#principleBadges {
+    color: #222 !important;
+    font-size: 1.2em !important;
+    background: #fff !important;
+}
+.principle-badge-img {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #bfa76a;
+    margin: 0 0.2em 0.2em 0;
+    box-shadow: 0 1px 4px #0002;
+    vertical-align: middle;
+}
+.principle-badge-locked {
+    display: inline-block;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    background: #f5f5f5;
+    margin: 0 0.2em 0.2em 0;
+    box-shadow: 0 1px 4px #0001;
+    vertical-align: middle;
+    text-align: center;
+    line-height: 48px;
+}
+
+/* ====== IMAGE POPUP ====== */
 #imagePopup {
+    /* Fullscreen overlay for enlarged images */
     display: none;
     position: fixed;
     top: 0; left: 0;
@@ -319,8 +491,6 @@ body, h1, h2, h3, h4, h5, h6, p, .special-elite, .popup-content, .modal-content,
     transition: transform 0.2s;
     cursor: zoom-out;
 }
-
-/* Make the map image look clickable */
 #map {
     cursor: zoom-in;
     transition: box-shadow 0.2s;
@@ -329,258 +499,38 @@ body, h1, h2, h3, h4, h5, h6, p, .special-elite, .popup-content, .modal-content,
     box-shadow: 0 0 16px #888;
 }
 
-/* Use Crimson Text for the principles text */
-#part2 .highlightable-text {
-    font-family: 'Crimson Text', serif !important;
+/* ====== INTRO IMAGE FADE ====== */
+.intro-image-fade {
+    opacity: 0;
+    transition: opacity 0.8s;
+}
+.intro-image-fade.visible {
+    opacity: 1;
 }
 
-span.highlighted.correct {
-    background: #FFD700 !important;
-}
-span.highlighted.incorrect {
-    background: rgb(220, 220, 220);
-}
-/* Center the map and button in part3 */
-#part3 .map-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center; /* Add this line */
-    position: relative;
-    min-height: 600px; /* Or whatever height fits your largest map */
-    min-width: 1000px; /* Ensure it doesn't shrink too small */
-}
-#part3 .map-container img {
-    max-width: 1000px;
-    max-height: 800px;
-    width: auto;
-    height: auto;
-    display: block;
-    margin: 0 auto;
-    object-fit: contain;
-    align-items: center;
-    justify-content: center; /* Add this line */
-    position: relative;
-}
-.enlarge-map-btn {
-    margin-top: 1em;
-    margin-bottom: 0.5em;
-}
-#enlargePart3MapBtn {
-    display: block;
-    margin: 1em auto 0 auto;
-}
-
-/* General style for all map overlays */
-.map-overlay-area {
-    position: absolute;
-    border: none;
-    background-color: rgba(0,0,0,0);
-    cursor: pointer;
-    transition: border 0.2s, background 0.2s;
-    z-index: 2;
-}
-/* Highlighted overlay */
-.overlay-visible {
-    border: 3px solid #e2d3b1 !important;
-    background-color: rgba(255, 255, 200, 0.18) !important;
-    box-shadow: 0 0 12px #e2d3b1;
-    pointer-events: none;
-    opacity: 0.6;
-}
-
-.principle-tag {
-    background-color: #5a310e; /* Brown */
-    color: #fff;
-    border: 2.5px solid #e2d3b1; /* Light border for key edge */
-    border-radius: 6px; /* Sharp, but slightly rounded like a key */
-    padding: 0.3em 1.2em;
-    box-shadow: none; /* No shadow */
-    font-size: 1em;
-    font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif; /* Typewriter font */
-    letter-spacing: 1px;
-    transition: background 0.2s, transform 0.1s;
-    margin-top: 16px;
-    margin-bottom: 8px;
-    outline: none;
-}
-/* Add to your style.css */
-.principle-found {
-    background: #1a7f1a !important;
-    color: #fff !important;
-    border-color: #b6e2b1 !important;
-    text-decoration: line-through;
-    opacity: 0.7;
-}
-#principleBadges {
-    color: #222 !important;
-    font-size: 1.2em !important;
-    background: #fff !important;
-}
-
-.principle-badge-img {
-    width: 48px;
-    height: 48px;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 2px solid #bfa76a;
-    margin: 0 0.2em 0.2em 0;
-    box-shadow: 0 1px 4px #0002;
-    vertical-align: middle;
-}
-
-.principle-badge-locked {
-    display: inline-block;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    border: 2px solid #ccc;
-    background: #f5f5f5;
-    margin: 0 0.2em 0.2em 0;
-    box-shadow: 0 1px 4px #0001;
-    vertical-align: middle;
-    text-align: center;
-    line-height: 48px;
-}
-
-#titleScreen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 5000;
-    background: #fffef9;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-}
-
-#titleScreenImg {
-    max-width: 80vw;
-    max-height: 60vh;
-    border-radius: 12px;
-    box-shadow: 0 4px 32px #000;
-}
-
-#startGameBtn {
-    margin-top: 2em;
-    font-size: 1.5em;
-    padding: 0.3em 1.2em;
-    border-radius: 6px;
-    border: 2.5px solid #e2d3b1;
-    background: #5a310e;
-    color: #fff;
-    cursor: pointer;
-    box-shadow: 0 2px 8px #0004;
-    transition: background 0.2s, color 0.2s;
-    font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif;
-    letter-spacing: 1px;
-}
-
-#startGameBtn:hover, #startGameBtn:focus {
-    background: #d1b97a;
-    color: #111;
-}
-
-.main-title {
-    position: relative;
-    font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif;
-    font-size: 3.2em;
-    letter-spacing: 0.04em;
-    margin-bottom: 0.5em;
-    line-height: 1.1;
-    text-align: center;
-    user-select: none;
-    color: #222;
-    text-shadow: 0 1px 0 #fff, 0 2px 8px #0002;
-    border-bottom: 2.5px solid #bfa76a;
-    display: inline-block;
-    background: #fdf6e3;
-    padding: 0.15em 0.5em 0.25em 0.5em;
-    box-shadow: 0 2px 12px #0002;
-}
-.main-title .title-shadow {
-    position: absolute;
-    left: 0; right: 0; top: 0; bottom: 0;
-    color: #000;
-    opacity: 0.18;
-    filter: blur(2.5px);
-    z-index: 0;
-    pointer-events: none;
-}
-.main-title .title-main {
-    position: relative;
-    color: #222;
-    z-index: 1;
-    letter-spacing: 0.04em;
-    font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif;
-    background: none;
-    text-shadow:
-        0 1px 0 #fff,
-        0 2px 8px #0002;
-}
-.main-title .typewriter-cursor {
-    display: inline-block;
-    width: 0.6em;
-    color: #bfa76a;
-    background: none;
-    animation: blink-cursor 1s steps(1) infinite;
-    font-weight: bold;
-    font-size: 1em;
-    vertical-align: middle;
-    margin-left: 0.1em;
-}
-
-#mainStartBtn, #showThankYouBtn, #optionsBtn, #startPrinciplesBtn, #finishBtn {
-    background: #5a310e;
-    color: #fff;
-    border: 2.5px solid #e2d3b1;
+/* ====== BOSS INTRO (PART 1) ====== */
+.boss-intro {
+    /* Special intro box for boss/character */
+    background-color: rgba(243, 207, 153, 0.9);
+    border: 1px solid #e2d3b1;
     border-radius: 8px;
-    font-size: 1.3em;
-    padding: 0.5em 2em;
-    margin-bottom: 1em;
-    font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif;
-    cursor: pointer;
-    box-shadow: 0 2px 8px #0002;
-    transition: background 0.2s, color 0.2s;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 600px;
+    text-align: left;
+    font-size: 16px;
+    line-height: 1.5;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
-#mainStartBtn:hover, #mainStartBtn:focus,
-#showThankYouBtn:hover, #showThankYouBtn:focus,
-#optionsBtn:hover, #optionsBtn:focus,
-#startPrinciplesBtn:hover, #startPrinciplesBtn:focus,
-#finishBtn:hover, #finishBtn:focus {
-    background: #d1b97a;
-    color: #111;
+.boss-intro p {
+    margin: 0 0 10px 0;
 }
-#optionsMenu {
-    background: #fdf6e3;
+.boss-intro img.boss-image {
+    display: block;
+    margin: 18px auto 0 auto;
+    max-width: 120px;
+    border-radius: 8px;
     border: 1.5px solid #e2d3b1;
-    border-radius: 10px;
-    padding: 1em 2em;
-    box-shadow: 0 2px 12px #0001;
-    margin: 0 auto;
-    max-width: 350px;
-}
-#optionsMenu button {
-    display: block;
-    width: 100%;
-    margin: 0.5em 0;
-}
-#menu {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5em;
-    width: 350px; /* Set a fixed width for the menu */
-    margin: 0 auto;
-}
-#menu button {
-    display: block;
-    width: 100%;
-    max-width: none; /* Remove max-width so all buttons fill the menu width */
-    margin: 0.5em 0;
-    text-align: center;
-    box-sizing: border-box;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
