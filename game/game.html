@@ -1712,6 +1712,7 @@ function showPart2IntroPopup() {
         popup.style.display = "flex";
 
         document.getElementById('part2TaskIntroOkBtn').onclick = function() {
+            suspicion = 10; // <-- Always reset suspicion here
             popup.remove();
             document.getElementById('part2').style.display = 'block'; // Only now show the text
             document.getElementById('suspicionBarContainer').style.display = 'block'; // Show suspicion bar
