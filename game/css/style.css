@@ -346,17 +346,22 @@ span.highlighted.incorrect {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center; /* Add this line */
     position: relative;
+    min-height: 600px; /* Or whatever height fits your largest map */
+    min-width: 1000px; /* Ensure it doesn't shrink too small */
 }
-
 #part3 .map-container img {
-    max-width: 1200px;
+    max-width: 1000px;
     max-height: 800px;
     width: auto;
     height: auto;
     display: block;
     margin: 0 auto;
     object-fit: contain;
+    align-items: center;
+    justify-content: center; /* Add this line */
+    position: relative;
 }
 .enlarge-map-btn {
     margin-top: 1em;
@@ -381,6 +386,8 @@ span.highlighted.incorrect {
     border: 3px solid #e2d3b1 !important;
     background-color: rgba(255, 255, 200, 0.18) !important;
     box-shadow: 0 0 12px #e2d3b1;
+    pointer-events: none;
+    opacity: 0.6;
 }
 
 .principle-tag {

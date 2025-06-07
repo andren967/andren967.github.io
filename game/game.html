@@ -23,6 +23,7 @@
 <div id="menu" style="display:none;">
     <h2>Select a Stage</h2>
     <div id="principleBadges" style="margin:1em 0; text-align:center;"></div>
+    <button id="showThankYouBtn" style="display:none; margin-top:1em;" onclick="showThankYouPopup()">Thank you</button>
     <label>
         <input type="checkbox" id="testmodeCheckbox" />
         Testmode (skip animations)
@@ -88,7 +89,7 @@
 <!-- Part 3: Principle Stages -->
 <div id="part3" style="display: none;">
     <h2 id="part3Title">Stage: Principle</h2>
-    <div class="map-container" style="position: relative;">
+    <div class="map-container">
         <img src="" alt="Map" id="part3Map">
         <div id="mapOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
             <div 
@@ -230,16 +231,17 @@
 
     let selectedWords = [];
     let activePrinciples = [];
+    let allCollected = [];
     let currentPrincipleIndex = 0;
     let currentMapIndex = 0;
 
     const mapsPerPrinciple = {
         projection: ["maps/divided_world.jpg", "maps/colonial_problem.jpg", "maps/Three_faces_of_Europe_1950.jpg", "maps/PJM_2454_01.jpg"],
         symbolization: ["maps/communists_menace_vital_materials.jpg", "maps/concept_of_deterrence.jpg", "maps/east vs west.jpg", "maps/war_against_america.jpg"],
-        generalization: ["maps/united_europe_for_peace.jpg", "maps/fifth_column_in_the_south.jpg", "maps/communists_menace_vital_materials.jpg", "maps/communist_contagion.jpg"],
-        classification: ["maps/communist_contagion.jpg", "maps/Defense_of_Europe_1954.jpg", "maps/PJM_2454_01.jpg", "maps/Three_faces_of_Europe_1950.jpg"],
-        Scale: ["maps/growth_of_russian_imperialism.jpg", "maps/europe_from_moscow.jpg", "maps/communist_contagion.jpg", "maps/Defense_of_Europe_1954.jpg"],
-        "Framing and orientation": ["maps/which_is_the_side_of_peace.jpg", "maps/europe_from_moscow.jpg", "maps/thats the spot.jpg", "maps/Framing4.jpg"],
+        generalization: ["maps/united_europe_for_peace.jpg", "maps/fifth_column_in_the_south.jpg", "maps/communists_menace_vital_materials.jpg", "maps/communist_contagion_map.jpg"],
+        classification: ["maps/communist_contagion_map.jpg", "maps/Defense_of_Europe_1954.jpg", "maps/PJM_2454_01.jpg", "maps/Three_faces_of_Europe_1950.jpg"],
+        Scale: ["maps/growth_of_russian_imperialism.jpg", "maps/europe_from_moscow.jpg", "maps/communist_contagion_map.jpg", "maps/Defense_of_Europe_1954.jpg"],
+        "Framing and orientation": ["maps/which_is_the_side_of_peace.jpg", "maps/europe_from_moscow.jpg", "maps/thats the spot.jpg", "maps/Asian_rimland_1950.jpg"],
         "Labeling and text placement": ["maps/thats the spot.jpg", "maps/colonial_problem.jpg", "maps/which_is_the_side_of_peace.jpg", "maps/war_against_america.jpg"],
         colour: ["maps/alaska.jpg", "maps/Asian_rimland_1950.jpg", "maps/colonial_problem.jpg", "maps/divided_world.jpg"]
     };
@@ -247,20 +249,20 @@
  const mapOverlays = {
     "maps/divided_world.jpg": [
         {
-            area: "central-eurasia",
-            top: "32%",
-            left: "38%",
-            width: "26%",
-            height: "32%",
-            description: "A traditional rectangular projection emphasizes separation between East and West, aligning with the ideological divide. Bold red and green color schemes heighten emotional impact, visually distinguishing 'us' from 'them' through aggressive contrast."
+            area: "full-image",
+            top: "5%",
+            left: "5%",
+            width: "90%",
+            height: "75%",
+            description: "The use of a Mercator projection exaggerates the size of polar regions and stretches Eurasia and the Pacific to wrap around a centered United States. This layout dramatizes America's position as surrounded and under threat from both East and West."
         }
     ],
     "maps/colonial_problem.jpg": [
         {
             area: "eurasia-focus",
-            top: "30%",
-            left: "45%",
-            width: "30%",
+            top: "5%",
+            left: "5%",
+            width: "90%",
             height: "40%",
             description: "The rectangular projection flattens and centers Soviet landmass, while vivid colors segment the colonial world by empire. Bold typographic blocks occupy colonies, making political ownership more prominent than the land itself—subtly reinforcing power hierarchies."
         }
@@ -268,38 +270,38 @@
     "maps/Three_faces_of_Europe_1950.jpg": [
         {
             area: "evolution-slice",
-            top: "15%",
-            left: "30%",
-            width: "40%",
-            height: "70%",
+            top: "9%",
+            left: "23%",
+            width: "55%",
+            height: "88%",
             description: "Stacked temporal views use a distorted perspective to exaggerate continuity in threats across decades. Classifying regions under visual regimes (WWI, WWII, Cold War) guides the viewer to draw conclusions about ideological evolution."
         }
     ],
     "maps/PJM_2454_01.jpg": [
         {
             area: "binary-division",
-            top: "30%",
-            left: "34%",
-            width: "33%",
-            height: "35%",
+            top: "7%",
+            left: "32.5%",
+            width: "34%",
+            height: "85%",
             description: "The distorted projection emphasizes Soviet and European landmasses while minimizing others. Combined with bold classifications into rigid ideological camps, it reinforces a binary worldview."
         }
     ],
     "maps/communists_menace_vital_materials.jpg": [
         {
             area: "threat-arcs",
-            top: "28%",
-            left: "36%",
-            width: "38%",
-            height: "44%",
+            top: "18%",
+            left: "45%",
+            width: "35%",
+            height: "30%",
             description: "Thick black arrows with numbers radiate from the Soviet Union like weapons, labeled with threatening economic commodities. By abstracting regions into numbered 'targets', the map suggests a coordinated campaign without showing any actual events or borders."
         }
     ],
     "maps/concept_of_deterrence.jpg": [
         {
             area: "missile-web",
-            top: "25%",
-            left: "30%",
+            top: "20%",
+            left: "25%",
             width: "42%",
             height: "48%",
             description: "The web of intersecting missile arcs, planes, and lines visually constructs a narrative of strategic superiority and omnipresent readiness. Symbols replace geography, turning the globe into a stage for conflict, with the U.S. appearing both distant and prepared."
@@ -309,8 +311,8 @@
         {
             area: "iron-curtain",
             top: "25%",
-            left: "42%",
-            width: "32%",
+            left: "25%",
+            width: "40%",
             height: "48%",
             description: "Cartoon symbols depict Uncle Sam wheeling Western goods toward barricaded, menaced Eastern Europe, which is patrolled by black beasts. This visual metaphor frames the Cold War not as politics, but as a battle of civilization versus savagery."
         }
@@ -318,77 +320,80 @@
     "maps/war_against_america.jpg": [
         {
             area: "usa-threats",
-            top: "20%",
-            left: "25%",
-            width: "50%",
-            height: "60%",
+            top: "30%",
+            left: "32%",
+            width: "38%",
+            height: "15%",
             description: "Here, symbolic clouds and arrows represent abstract threats like propaganda and psychological warfare. The map relies entirely on symbolic visual cues rather than geographic accuracy to deliver its persuasive message."
         }
     ],
     "maps/united_europe_for_peace.jpg": [
         {
             area: "umbrella-europe",
-            top: "30%",
-            left: "30%",
-            width: "38%",
-            height: "50%",
+            top: "21.5%",
+            left: "35%",
+            width: "33%",
+            height: "19%",
             description: "The map uses visual symbolism and dramatic simplification, generalizing Europe’s unity under shared values by representing it as a child holding a unified umbrella against a looming red threat, minimizing geographic specifics for narrative clarity."
         }
     ],
     "maps/fifth_column_in_the_south.jpg": [
         {
             area: "southern-us",
-            top: "50%",
-            left: "20%",
-            width: "50%",
-            height: "35%",
+            top: "45%",
+            left: "28%",
+            width: "25%",
+            height: "28%",
             description: "Red symbols are scattered loosely over the Southern U.S., suggesting communist infiltration without context. The oversimplified layout equates internal dissent with external threat, generalizing fear across the entire region."
         }
     ],
-    "maps/communist_contagion.jpg": [
+    "maps/communist_contagion_map.jpg": [
         {
             area: "contagion-zone",
-            top: "20%",
-            left: "28%",
-            width: "45%",
-            height: "50%",
+            top: "68%",
+            left: "85%",
+            width: "14.5%",
+            height: "14%",
             description: "This map merges entire nations and regions under broad, stylized labels like “Quarantined” or “Infected.” The exaggerated red mass and uniform stripes across disparate countries simplify geopolitical dynamics into a medical metaphor, using fear to replace nuance."
         }
     ],
     "maps/Defense_of_Europe_1954.jpg": [
         {
-            area: "europe-focus",
-            style: "position:absolute;top:30%;left:35%;width:40%;height:35%;border:none;background-color:rgba(0,0,0,0);cursor:pointer;",
+            area: "defense-europe",
+            top: "40%",
+            left: "31%",
+            width: "35%",
+            height: "60%",
             description: "This map classifies countries into NATO-aligned and enemy zones using stark, flat colors, stripping away complexity in political relationships. The globe’s curvature is exaggerated to compress geographic distances, making Soviet proximity feel more immediate and threatening."
         }
     ],
     "maps/growth_of_russian_imperialism.jpg": [
         {
             area: "shading-expansion",
-            top: "25%",
-            left: "35%",
-            width: "40%",
-            height: "45%",
+            top: "9.5%",
+            left: "36%",
+            width: "43.5%",
+            height: "65.5%",
             description: "Territorial expansion is exaggerated through progressive shadings and inset maps. This manipulation of scale makes each phase of Soviet growth seem massive and continuous, invoking a sense of unstoppable advance."
         }
     ],
     "maps/europe_from_moscow.jpg": [
         {
             area: "soviet-horizon",
-            top: "28%",
-            left: "30%",
-            width: "40%",
-            height: "45%",
+            top: "37%",
+            left: "3%",
+            width: "46%",
+            height: "37%",
             description: "By presenting Europe and Asia from Moscow’s perspective, the map exaggerates Soviet spatial reach. The tilted orientation and enlarged areas near Russia convey omnipresence, making Western viewers feel surrounded."
         }
     ],
     "maps/which_is_the_side_of_peace.jpg": [
         {
             area: "peace-divide",
-            top: "28%",
-            left: "33%",
-            width: "35%",
-            height: "45%",
+            top: "15%",
+            left: "12%",
+            width: "78%",
+            height: "50%",
             description: "The split-screen layout and mirrored geographies invite direct comparison between West and East. Labels and color choices frame the West as open and peaceful, the East as aggressive, urging the viewer to pick a “side.”"
         }
     ],
@@ -396,39 +401,29 @@
         {
             area: "target-japan",
             top: "20%",
-            left: "42%",
-            width: "28%",
-            height: "38%",
-            description: "This poster-style map directs attention toward Japan as a target using concentric circles and bold pointer gesture, while text placement reinforces the message. Framing Tokyo centrally constructs it as the locus of military focus."
-        }
-    ],
-    "maps/Framing4.jpg": [
-        {
-            area: "crop-focus",
-            top: "30%",
             left: "30%",
-            width: "40%",
-            height: "40%",
-            description: "Deliberate cropping and emphasis change what feels central or marginal."
+            width: "13%",
+            height: "16%",
+            description: "This poster-style map directs attention toward Japan as a target using concentric circles and bold pointer gesture, while text placement reinforces the message. Framing Tokyo centrally constructs it as the locus of military focus."
         }
     ],
     "maps/alaska.jpg": [
         {
             area: "defensive-alaska",
-            top: "28%",
+            top: "33%",
             left: "28%",
-            width: "45%",
-            height: "48%",
+            width: "46%",
+            height: "40%",
             description: "The use of green tones lends a calm, natural legitimacy to U.S. territory, while darker contrasting shades highlight military presence and infrastructure. This selective color use masks militarization under the appearance of neutral geography."
         }
     ],
     "maps/Asian_rimland_1950.jpg": [
         {
             area: "red-waves",
-            top: "25%",
-            left: "45%",
-            width: "35%",
-            height: "50%",
+            top: "3%",
+            left: "30%",
+            width: "50%",
+            height: "38%",
             description: "Red concentric waves radiating from the U.S.S.R. create a sense of creeping influence and expansion. Color contrasts (red vs. green vs. blue) visually encode ideological alliances, suggesting both threat proximity and containment urgency."
         }
     ]
@@ -449,73 +444,73 @@ const twoWorldsMapOverlays = [
     {
         principle: "projection",
         area: "central-eurasia",
-        top: "28%",
-        left: "34%",
-        width: "30%",
-        height: "38%",
+        top: "1%",
+        left: "10%",
+        width: "80%",
+        height: "63%",
         description: "The curved projection places Eurasia in the center, visually inflating Soviet territory while pushing the Americas to the periphery—intensifying the perception of Soviet dominance and geographic centrality in global conflict."
     },
     {
         principle: "colour",
         area: "east-west-color",
-        top: "20%",
-        left: "62%",
-        width: "25%",
-        height: "35%",
+        top: "38%",
+        left: "40%",
+        width: "10%",
+        height: "10%",
         description: "Bold red for the USSR and dark blue for the West visually encode ideological opposition. The aggressive saturation of red evokes danger and urgency, while the cool blues suggest order and alliance."
     },
     {
         principle: "classification",
         area: "bloc-zoning",
-        top: "40%",
-        left: "40%",
-        width: "30%",
-        height: "25%",
+        top: "20%",
+        left: "20%",
+        width: "63%",
+        height: "33%",
         description: "Regions are classified into clearly delineated ideological zones using color coding and hatch patterns—‘Soviet-aligned’, ‘Western-aligned’, and ‘contested’—framing the world as a rigid dichotomy."
     },
     {
         principle: "Scale",
         area: "soviet-dominance",
-        top: "30%",
-        left: "45%",
-        width: "35%",
-        height: "40%",
+        top: "20%",
+        left: "36%",
+        width: "47%",
+        height: "35%",
         description: "The USSR is visually overrepresented through enlarged landmass and centralized placement, creating an inflated impression of power and reach that may not align with geographic reality."
     },
     {
         principle: "Framing and orientation",
         area: "frame-focus",
-        top: "10%",
-        left: "25%",
-        width: "50%",
-        height: "75%",
+        top: "57%",
+        left: "4%",
+        width: "29.5%",
+        height: "42%",
         description: "The globe is tilted to center Eurasia and the Soviet threat, marginalizing the Americas. This orientation places ideological confrontation at the heart of the world, reinforcing urgency and proximity."
     },
     {
         principle: "Labeling and text placement",
         area: "hammer-sickle-label",
-        top: "40%",
-        left: "50%",
-        width: "20%",
-        height: "20%",
-        description: "The giant hammer and sickle symbol dominates Soviet territory, visually overriding individual country names and drawing all attention to the central threat, while Western countries are labeled discretely and formally."
-    },
+        top: "7%",
+        left: "6.5%",
+        width: "16%",
+        height: "12%",
+        description: "The bold placement of the phrase 'TWO WORLDS' at the top left serves as a narrative frame for the entire map. Rather than describing geography, the title divides the globe ideologically from the outset, inviting viewers to interpret all visual details through the lens of absolute opposition."
+    }, 
     {
         principle: "symbolization",
         area: "visual-cue-region",
-        top: "15%",
-        left: "60%",
-        width: "20%",
-        height: "25%",
+        top: "30.5%",
+        left: "53.5%",
+        width: "9.5%",
+        height: "17.5%",
         description: "Military-style hatching and directional shading evoke expansion or influence emanating from the USSR. The use of a large communist emblem reinforces symbolic threat over geographic detail."
     },
     {
         principle: "generalization",
         area: "broad-zones",
-        top: "18%",
+        top: "20%",
         left: "15%",
-        width: "30%",
-        height: "35%",
+        width: "28%",
+        height: "32%",
         description: "Countries are grouped into sweeping color-coded areas, flattening political nuance and ignoring local diversity in favor of a clean East-West binary. Subtleties of allegiance or independence are erased."
     }
 ];
@@ -555,7 +550,7 @@ const twoWorldsMapOverlays = [
 
         // If no principles have been selected (e.g. started from menu), use the first 3 correct principles
         if (!activePrinciples || activePrinciples.length === 0) {
-            activePrinciples = correctPrinciples.slice(0, 1);
+            activePrinciples = correctPrinciples.slice(7, 8);
         }
 
         if (activePrinciples.length === 0) {
@@ -571,7 +566,17 @@ const twoWorldsMapOverlays = [
 
     function startPart4() {
         // Use the first 3 correct principles for this part
-        activePrinciples = correctPrinciples.slice(0, 3);
+        activePrinciples = correctPrinciples.slice(0, 8);
+        /*    activePrinciples = [
+        //"projection",
+        //"symbolization",
+        //"generalization",
+        //"classification",
+        //"Scale",
+        //"Framing and orientation",
+        //"Labeling and text placement",
+        "colour"
+    ];*/
         document.getElementById('menu').style.display = 'none';
         document.getElementById('part3').style.display = 'block';
         showTwoWorldsPrincipleDiscovery(activePrinciples, function() {
@@ -1305,7 +1310,6 @@ function returnToMenu() {
     document.getElementById('part2').style.display = 'none';
     document.getElementById('part3').style.display = 'none';
     document.getElementById('suspicionBarContainer').style.display = 'none';
-    document.getElementById('menu').style.display = 'block';
 
     // Remove any intro or character popups if present
     const introPopup = document.getElementById('part1IntroPopup');
@@ -1314,6 +1318,15 @@ function returnToMenu() {
     if (characterPopup) characterPopup.remove();
     const part1TaskIntroPopup = document.getElementById('part1TaskIntroPopup');
     if (part1TaskIntroPopup) part1TaskIntroPopup.remove();
+
+    const allCollected = correctPrinciples.every(p => completedPrinciples.includes(p));
+    if (allCollected && !document.getElementById('thankYouPopup')) {
+        document.getElementById('menu').style.display = 'none';
+        showThankYouPopup();
+        return;
+    }
+
+    document.getElementById('menu').style.display = 'block';
 
     // Reset game state
     currentMapIndex = 0;
@@ -1335,7 +1348,7 @@ function returnToMenu() {
 
     updatePrincipleBadges();
 
-        const allPrinciples = [
+    /*const allPrinciples = [
         "projection",
         "symbolization",
         "generalization",
@@ -1344,11 +1357,8 @@ function returnToMenu() {
         "Framing and orientation",
         "Labeling and text placement",
         "colour"
-    ];
-    const allCollected = allPrinciples.every(p => completedPrinciples.includes(p));
-    if (allCollected && !document.getElementById('thankYouPopup')) {
-        setTimeout(showThankYouPopup, 400); // slight delay for menu to appear
-    }
+    ];*/
+
 }
 
 // Map image enlarge popup logic
@@ -1928,11 +1938,11 @@ function showTwoWorldsPrincipleDiscovery(activePrinciples, onFinish) {
         div.style.left = overlay.left;
         div.style.width = overlay.width;
         div.style.height = overlay.height;
-        div.title = overlay.principle;
 
         div.onclick = function(e) {
-            if (div.classList.contains('overlay-visible')) return;
+            if (div.classList.contains('overlay-visible')) return; // Already found, do nothing
             div.classList.add('overlay-visible');
+            div.style.pointerEvents = "none"; // Make this overlay unclickable after selection
             foundPrinciples.add(overlay.principle);
 
             // Update the principle list to mark found
@@ -2118,6 +2128,13 @@ function updatePrincipleBadges() {
                 : `<span class="principle-badge">${p}</span>`)
             : `<span class="principle-badge-locked" title="Locked"><img src="badges/lock.png" alt="Locked" style="width:32px;height:32px;opacity:0.5;vertical-align:middle;"></span>`
     ).join(' ');
+
+    // Show or hide the ending button
+    const showThankYouBtn = document.getElementById('showThankYouBtn');
+    if (showThankYouBtn) {
+        const allCollected = allPrinciples.every(p => completedPrinciples.includes(p));
+        showThankYouBtn.style.display = allCollected ? "inline-block" : "none";
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -2148,6 +2165,11 @@ document.addEventListener('DOMContentLoaded', function() {
             // Reset and update badges/menu state
             returnToMenu();
         };
+
+    const showThankYouBtn = document.getElementById('showThankYouBtn');
+    if (showThankYouBtn) {
+        showThankYouBtn.onclick = showThankYouPopup;
+    }
     }
 
 
