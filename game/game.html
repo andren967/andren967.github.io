@@ -21,19 +21,11 @@
 
 <!-- Menu to choose between stages -->
 <div id="menu" style="display:none;">
-    <h2>Select a Stage</h2>
+    <h2>Main Menu</h2>
     <div id="principleBadges" style="margin:1em 0; text-align:center;"></div>
-    <button id="showThankYouBtn" style="display:none; margin-top:1em;" onclick="showThankYouPopup()">Thank you</button>
-    <label>
-        <input type="checkbox" id="testmodeCheckbox" />
-        Testmode (skip animations)
-    </label>
-    <br>
-    <button onclick="startPart1()">Start Part 1: Map Game</button>
-    <button onclick="startPart2()">Start Part 2: Text Selection</button>
-    <button onclick="startPart3()">Start Part 3: Principles</button>
-    <button onclick="startPart4()">Start Part 4: Two Worlds Principle Discovery</button>
-    <button onclick="showThankYouPopup()">Start Thank You</button>
+    <button id="showThankYouBtn" style="display:none; margin-top:1em;" onclick="showThankYouPopup()">View Ending</button>
+    <button id="mainStartBtn" onclick="startPart1()" style="margin: 1.5em 0 1em 0; font-size:1.3em;">Start Game</button>
+    <button id="optionsBtn" onclick="showOptionsPopup()" style="margin-bottom:1em;">Options</button>
 </div>
 
 <!-- Part 1: Map Game -->
@@ -103,8 +95,9 @@
 
 <div id="suspicionBarContainer" style="display:none;">
     <label for="suspicionBar">Suspicion</label>
-    <div class="suspicion-bar-bg">
-        <div id="suspicionBar"></div>
+    <div class="suspicion-bar-bg" style="position:relative;">
+        <div id="suspicionBar" style="position:relative; width:110px; height:18px;"></div>
+        <div id="suspicionMarker" style="position:absolute;top:0;left:0;height:100%;width:100%;pointer-events:none;"></div>
         <span id="suspicionValue">5 / 25</span>
     </div>
     <div id="suspicionChange"></div>
@@ -112,7 +105,7 @@
 
 <div class="modal" id="failureModal" style="display:none;">
     <div class="modal-content">
-        <h2>Game Over</h2>part3
+        <h2>Game Over</h2>
         <p id="failureText">You have failed to maintain the regime's trust. The newsroom falls silent as suspicion closes in.</p>
         <button onclick="returnToMenu()">Return to Main Menu</button>
     </div>
@@ -129,6 +122,8 @@
     const suspicionMax = 25;
     let isFailure = false;
     
+    let typewriterAbort = false;
+
     let completedPrinciples = [];
 
     const maps = [
@@ -148,8 +143,13 @@
                     suspicion: -2
                 }
                 ],
-            story: "Leona leaned back in her chair, eyes lingering on the headline above the map. She had chosen the middle-ground text—firm, but not alarmist. It felt like the safest path, toeing the line without sounding too eager. As the typesetters took her copy downstairs, she found herself wondering what readers would take from it. Not doubt—just curiosity, a quiet awareness that her words might shape more than she realized. A new folder landed on her desk with a quiet thud—two more maps, and the afternoon had only just begun." 
-        },
+            story: `Leona leaned back in her chair, eyes lingering on the headline above the map.<br>
+                    She had chosen the middle-ground text—firm, but not alarmist. It felt like the safest path, toeing the line without sounding too eager.<br>
+                    As the typesetters took her copy downstairs, she found herself wondering what readers would take from it.<br>
+                    Not doubt—just curiosity, a quiet awareness that her words might shape more than she realized.<br>
+                    A new folder landed on her desk with a quiet thud—two more maps, and the afternoon had only just begun.
+                    `
+        },	
     {
         src: "maps/thats the spot.jpg",
         options: [
@@ -166,7 +166,10 @@
                 suspicion: 2
             }
         ],
-        story: "Leona tapped the end of her pencil against the desk, staring at the phrase she’d just typed. It was bold—maybe too bold—but it matched the tone the editor would expect. She adjusted a few words, softened one sentence, but kept the resolve intact. The figure in the poster looked sure of himself, and somehow, she felt expected to match that certainty. She hadn’t even filed the piece yet when another rolled-up campaign sheet landed beside her elbow—another image, another message to craft."
+        story: `Leona tapped the end of her pencil against the desk, staring at the phrase she’d just typed.It was bold—maybe too bold—but it matched the tone the editor would expect.<br>
+                She adjusted a few words, softened one sentence, but kept the resolve intact.The figure in the poster looked sure of himself, and somehow, she felt expected to match that certainty.<br>
+                She hadn’t even filed the piece yet when another rolled-up campaign sheet landed beside her elbow—another image, another message to craft.`
+
     },
     {
         src: "maps/divided_world.jpg",
@@ -184,7 +187,10 @@
                 suspicion: 2
             }
         ],
-        story: "Leona read over the numbers twice—population, coal, barrels of oil—all neat and boxed on the page. There was something about this map that felt colder than the others, as though the world had been reduced to colors, factories, and body counts. She didn’t feel uneasy, exactly—just aware of how much rested in how things were framed. With a quiet breath, she typed the final sentence and leaned back. Another map already waited in the out-tray."
+        story: `Leona read over the numbers twice—population, coal, barrels of oil—all neat and boxed on the page.There was something about this map that felt colder than the others, as though the world had been reduced to colors, factories, and body counts.<br>
+                She didn’t feel uneasy, exactly—just aware of how much rested in how things were framed.With a quiet breath, she typed the final sentence and leaned back.
+                Another map already waited in the out-tray.`
+
     },
 
     {
@@ -702,7 +708,7 @@ function loadPrincipleStage() {
 
         // Clamp suspicion between 0 and suspicionMax
         suspicion = Math.max(0, Math.min(suspicionMax, suspicion));
-        updateSuspicionBar();
+        updateSuspicionBar(20);
         showSuspicionChange(option.suspicion); // Show suspicion change
 
         // Show the story for the current map
@@ -766,6 +772,7 @@ function loadPrincipleStage() {
             document.getElementById('part1').style.display = 'none';
             document.getElementById('suspicionBarContainer').style.display = 'none';
             document.getElementById('part2').style.display = 'block';
+            showPart2IntroPopup();
         }
     }
 
@@ -816,7 +823,7 @@ function loadPrincipleStage() {
 document.getElementById('highlightableText').addEventListener('click', function (event) {
     if (event.target.tagName === 'SPAN') {
         event.target.classList.toggle('highlighted');
-        const word = event.target.textContent.replace(/[.,!?]/g, ''); // Remove punctuation
+        const word = event.target.textContent.replace(/[.,!?]/g, '');
 
         // Remove previous correct/incorrect classes
         event.target.classList.remove('correct', 'incorrect');
@@ -824,17 +831,45 @@ document.getElementById('highlightableText').addEventListener('click', function 
         if (event.target.classList.contains('highlighted')) {
             if (correctPrinciples.includes(word)) {
                 event.target.classList.add('correct');
+                suspicion += 3;
+                showSuspicionChange(+3);
             } else {
                 event.target.classList.add('incorrect');
+                suspicion -= 2;
+                showSuspicionChange(-2);
             }
             selectedWords.push(word);
         } else {
+            // Undo suspicion change when unselecting
+            if (correctPrinciples.includes(word)) {
+                suspicion -= 3;
+                showSuspicionChange(-3);
+            } else {
+                suspicion += 2;
+                showSuspicionChange(+2);
+            }
             selectedWords = selectedWords.filter(item => item !== word);
         }
+        // Clamp suspicion and update bar
+        suspicion = Math.max(0, Math.min(suspicionMax, suspicion));
+        updateSuspicionBar(15);
     }
 });
 
 function finishGame() {
+        // Only for Game 2: if suspicion is below 15, show game over and return
+    if (suspicion < 15) {
+        const failureModal = document.getElementById('failureModal');
+        document.getElementById('failureText').innerHTML =
+             `<img src="images/game_over1.png" alt="Game Over" style="max-width:180px;display:block;margin:0 auto 1em auto;">
+            Leona’s careful reading wasn’t enough. She returned to the office without hope, without clarity—trapped in the logic of her work, blind to the message it carried.
+            Caught in the rhythm of deadlines and office routine, she filed each piece with quiet diligence.
+            But the deeper forces at work—the visual tricks, the patterns, the framing—slipped past her.
+            Without grasping the power of the maps she annotated, she stayed inside the frame others had drawn.
+            The world moved on. And she, still at her desk, never saw the full picture.`;
+        failureModal.style.display = 'flex';
+        return;
+    }
     const correctSelections = selectedWords.filter(word => correctPrinciples.includes(word));
     const incorrectSelections = selectedWords.filter(word => !correctPrinciples.includes(word));
     // Remove duplicates for display
@@ -1253,7 +1288,7 @@ function showPrincipleAutoIntro(principles) {
                     <strong>Your editor has assigned you to select the accompanying text for today's published map.</strong>
                 </p>
                 <p>
-                    Choose the statement that best reflects the message <strong>The Sentinel</strong> wants to convey.<br>
+                    Choose the statement that best reflects the message <em>The Sentinel</em> wants to convey.<br>
                     Your words must support the newspaper’s perspective—and by extension, the regime’s.
                 </p>
                 <p>
@@ -1267,8 +1302,8 @@ function showPrincipleAutoIntro(principles) {
         document.getElementById('part1TaskIntroOkBtn').onclick = function() {
             popup.remove();
             document.getElementById('part1').style.display = 'block';
-            document.getElementById('suspicionBarContainer').style.display = 'block'; // Show suspicion bar
-            updateSuspicionBar(); // <-- Ensure the bar and value are correct
+            document.getElementById('suspicionBarContainer').style.display = 'block';
+            updateSuspicionBar(20); // <-- Marker at 20 for Game 1
             updateMap();
         };
     }
@@ -1278,14 +1313,40 @@ function showPrincipleAutoIntro(principles) {
         showPart1TaskIntroPopup();
     };
 
-function updateSuspicionBar() {
+function updateSuspicionBar(minSuspicion = null) {
     const bar = document.getElementById('suspicionBar');
     const val = document.getElementById('suspicionValue');
     const percent = Math.round((suspicion / suspicionMax) * 100);
 
     // The cover overlays the unfilled part of the bar
     bar.innerHTML = `<div class="suspicion-bar-cover" style="left:${percent}%;width:${100 - percent}%;"></div>`;
+
     val.textContent = `${suspicion} / ${suspicionMax}`;
+
+    // Update the marker
+    const marker = document.getElementById('suspicionMarker');
+    if (marker) {
+        const minValue = minSuspicion !== null ? minSuspicion : 15;
+        if (minValue > 0) {
+            // Get the actual width of the bar in pixels
+            const barWidth = bar.offsetWidth || 110; // fallback to 110px if not rendered yet
+            const minPx = (minValue / suspicionMax) * barWidth;
+            marker.innerHTML = `
+                <div style="
+                    position:absolute;
+                    left:${minPx - 1}px;
+                    top:0;
+                    height:100%;
+                    width:2px;
+                    background:black;
+                    z-index:3;
+                    pointer-events:none;
+                "></div>
+            `;
+        } else {
+            marker.innerHTML = '';
+        }
+    }
 }
 
 function showSuspicionChange(amount) {
@@ -1382,6 +1443,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function typewriterEffect(target, html, callback) {
+    // Abort any running typewriter
+    typewriterAbort = true;
+
     // If testmode is enabled, show the text instantly (no animation)
     if (typeof testmode !== "undefined" && testmode) {
         target.innerHTML = html;
@@ -1396,7 +1460,7 @@ function typewriterEffect(target, html, callback) {
 
     target.textContent = "";
     let i = 0;
-    let localAbort = false;
+    typewriterAbort = false; // Reset abort for this run
 
     // Try to find the closest modal ancestor, fallback to storyModal for legacy code
     let modal = target.closest('.modal') || document.getElementById('storyModal');
@@ -1404,12 +1468,12 @@ function typewriterEffect(target, html, callback) {
 
     modal.onclick = function(e) {
         if (!e.target.closest('button')) {
-            localAbort = true;
+            typewriterAbort = true;
         }
     };
 
     function type() {
-        if (localAbort) {
+        if (typewriterAbort) {
             target.innerHTML = html;
             if (callback) callback();
             modal.onclick = null;
@@ -1634,6 +1698,8 @@ function showPart2IntroPopup() {
         document.getElementById('part2TaskIntroOkBtn').onclick = function() {
             popup.remove();
             document.getElementById('part2').style.display = 'block';
+            document.getElementById('suspicionBarContainer').style.display = 'block'; // Show suspicion bar
+            updateSuspicionBar(15);
         };
     }
 
@@ -2188,6 +2254,21 @@ document.addEventListener('DOMContentLoaded', function() {
             showPart2IntroPopup();
         };
     }
+
+        const optionsBtn = document.getElementById('optionsBtn');
+    const optionsMenu = document.getElementById('optionsMenu');
+    const closeOptionsBtn = document.getElementById('closeOptionsBtn');
+
+    if (optionsBtn && optionsMenu) {
+        optionsBtn.onclick = function() {
+            optionsMenu.style.display = optionsMenu.style.display === 'none' ? 'block' : 'none';
+        };
+    }
+    if (closeOptionsBtn && optionsMenu) {
+        closeOptionsBtn.onclick = function() {
+            optionsMenu.style.display = 'none';
+        };
+    }
 });
 
 function handleStartGame() {
@@ -2250,6 +2331,75 @@ function showThankYouPopup() {
 
     okBtn.onclick = function() {
         popup.remove();
+    };
+}
+
+function showOptionsPopup() {
+    // Remove any existing popup
+    let oldPopup = document.getElementById('optionsPopup');
+    if (oldPopup) oldPopup.remove();
+
+    // Create the popup overlay
+    const popup = document.createElement('div');
+    popup.id = 'optionsPopup';
+    popup.className = 'modal';
+    popup.style.display = 'flex';
+    popup.style.alignItems = 'center';
+    popup.style.justifyContent = 'center';
+    popup.style.position = 'fixed';
+    popup.style.top = '0';
+    popup.style.left = '0';
+    popup.style.width = '100vw';
+    popup.style.height = '100vh';
+    popup.style.zIndex = '5000';
+    popup.style.background = 'rgba(0,0,0,0.7)';
+    popup.innerHTML = `
+        <div class="popup-content" style="max-width: 400px;">
+            <h3>Options</h3>
+            <label style="display:block; margin-bottom:0.5em;">
+                <input type="checkbox" id="testmodeCheckboxPopup" ${testmode ? 'checked' : ''}/>
+                Testmode (skip animations)
+            </label>
+            <button id="optStartPart2Btn">Start Part 2: Text Selection</button>
+            <button id="optStartPart3Btn">Start Part 3: Principles</button>
+            <button id="optStartPart4Btn">Start Part 4: Two Worlds Principle Discovery</button>
+            <button id="optThankYouBtn">Start Thank You</button>
+            <button id="closeOptionsPopupBtn" style="margin-top:1em;">Close Options</button>
+        </div>
+    `;
+    document.body.appendChild(popup);
+
+    // Sync testmode checkbox
+    const testmodeCheckbox = document.getElementById('testmodeCheckboxPopup');
+    if (testmodeCheckbox) {
+        testmodeCheckbox.checked = testmode;
+        testmodeCheckbox.onchange = function() {
+            testmode = testmodeCheckbox.checked;
+            // Also sync the main menu checkbox if present
+            const mainCheckbox = document.getElementById('testmodeCheckbox');
+            if (mainCheckbox) mainCheckbox.checked = testmode;
+        };
+    }
+
+    document.getElementById('closeOptionsPopupBtn').onclick = function() {
+        popup.remove();
+    };
+
+    document.getElementById('optStartPart2Btn').onclick = function() {
+        popup.remove();
+        startPart2();
+    };
+    document.getElementById('optStartPart3Btn').onclick = function() {
+        popup.remove();
+        startPart3();
+    };
+    document.getElementById('optStartPart4Btn').onclick = function() {
+        popup.remove();
+        startPart4();
+    };
+    document.getElementById('optThankYouBtn').onclick = function() {
+        popup.remove();
+        showThankYouPopup();
     };
 }
 

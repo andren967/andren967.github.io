@@ -275,7 +275,6 @@ body, h1, h2, h3, h4, h5, h6, p, .special-elite, .popup-content, .modal-content,
     background: linear-gradient(90deg, rgba(178,34,34,1) 0%, rgba(207,207,83,1) 51%, rgba(4,133,70,1) 100%);
     border: 1.5px solid #e2d3b1;
     border-radius: 6px;
-    margin-right: 10px;
     box-shadow: 0 1px 4px #0001 inset;
     overflow: hidden;
 }
@@ -532,4 +531,36 @@ span.highlighted.incorrect {
     font-size: 1em;
     vertical-align: middle;
     margin-left: 0.1em;
+}
+
+#mainStartBtn {
+    background: #5a310e;
+    color: #fff;
+    border: 2.5px solid #e2d3b1;
+    border-radius: 8px;
+    font-size: 1.3em;
+    padding: 0.5em 2em;
+    margin-bottom: 1em;
+    font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif;
+    cursor: pointer;
+    box-shadow: 0 2px 8px #0002;
+    transition: background 0.2s, color 0.2s;
+}
+#mainStartBtn:hover, #mainStartBtn:focus {
+    background: #d1b97a;
+    color: #111;
+}
+#optionsMenu {
+    background: #fdf6e3;
+    border: 1.5px solid #e2d3b1;
+    border-radius: 10px;
+    padding: 1em 2em;
+    box-shadow: 0 2px 12px #0001;
+    margin: 0 auto;
+    max-width: 350px;
+}
+#optionsMenu button {
+    display: block;
+    width: 100%;
+    margin: 0.5em 0;
 }
