@@ -533,7 +533,7 @@ span.highlighted.incorrect {
     margin-left: 0.1em;
 }
 
-#mainStartBtn {
+#mainStartBtn, #showThankYouBtn, #optionsBtn, #startPrinciplesBtn {
     background: #5a310e;
     color: #fff;
     border: 2.5px solid #e2d3b1;
@@ -563,4 +563,20 @@ span.highlighted.incorrect {
     display: block;
     width: 100%;
     margin: 0.5em 0;
+}
+#menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5em;
+    width: 350px; /* Set a fixed width for the menu */
+    margin: 0 auto;
+}
+#menu button {
+    display: block;
+    width: 100%;
+    max-width: none; /* Remove max-width so all buttons fill the menu width */
+    margin: 0.5em 0;
+    text-align: center;
+    box-sizing: border-box;
 }

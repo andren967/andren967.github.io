@@ -25,7 +25,10 @@
     <div id="principleBadges" style="margin:1em 0; text-align:center;"></div>
     <button id="showThankYouBtn" style="display:none; margin-top:1em;" onclick="showThankYouPopup()">View Ending</button>
     <button id="mainStartBtn" onclick="startPart1()" style="margin: 1.5em 0 1em 0; font-size:1.3em;">Start Game</button>
+    <!--
     <button id="optionsBtn" onclick="showOptionsPopup()" style="margin-bottom:1em;">Options</button>
+    -->
+    <button id="startPrinciplesBtn" onclick="startPart2()" style="display:none; margin-bottom:1em; font-size:1.3em;">Re-Run (From Principles Selection)</button>    
 </div>
 
 <!-- Part 1: Map Game -->
@@ -912,6 +915,8 @@ function finishGame() {
 
     const scoreModal = document.getElementById('scoreModal');
     scoreModal.style.display = 'flex';
+
+    window.hasFinishedPart2 = true;
 }
 
 function closeScoreModal() {
@@ -1398,6 +1403,17 @@ function returnToMenu() {
     currentPrincipleIndex = 0;
     isFailure = false;
 
+    // Show "Start Principles Selection" button if player has finished Part 2 at least once
+    const startPrinciplesBtn = document.getElementById('startPrinciplesBtn');
+    if (startPrinciplesBtn) {
+        // You can use a flag in localStorage or a JS variable to track if Part 2 was finished
+        if (window.hasFinishedPart2) {
+            startPrinciplesBtn.style.display = 'inline-block';
+        } else {
+            startPrinciplesBtn.style.display = 'none';
+        }
+    }
+
     // Reset UI elements
     updateSuspicionBar();
     const result = document.getElementById('result');
@@ -1662,7 +1678,7 @@ function showPart2IntroPopup() {
                 showSection(sectionIndex);
             } else {
                 introPopup.remove();
-                showPart2TaskIntroPopup(); // Show the task instructions before showing part2
+                showPart2TaskIntroPopup(); // Only now show the task message, and only after that show part2
             }
         };
 
@@ -1697,7 +1713,7 @@ function showPart2IntroPopup() {
 
         document.getElementById('part2TaskIntroOkBtn').onclick = function() {
             popup.remove();
-            document.getElementById('part2').style.display = 'block';
+            document.getElementById('part2').style.display = 'block'; // Only now show the text
             document.getElementById('suspicionBarContainer').style.display = 'block'; // Show suspicion bar
             updateSuspicionBar(15);
         };
@@ -1770,52 +1786,77 @@ function showOverlayDescription(description, callback) {
     popup.style.background = 'none'; // No background
     popup.innerHTML = `
         <div class="popup-content" style="max-width: 500px;">
+            <div id="overlayDescriptionHeading" style="font-weight:bold;margin-bottom:0.5em;"></div>
             <div id="overlayDescriptionText"></div>
             <button id="overlayDescriptionOkBtn" style="display:none;">OK</button>
         </div>
     `;
     document.body.appendChild(popup);
 
-    const textTarget = document.getElementById('overlayDescriptionText');
-    const okBtn = document.getElementById('overlayDescriptionOkBtn');
+const headingTarget = document.getElementById('overlayDescriptionHeading');
+const textTarget = document.getElementById('overlayDescriptionText');
+const okBtn = document.getElementById('overlayDescriptionOkBtn');
 
-    if (typeof testmode !== "undefined" && testmode) {
-        textTarget.innerHTML = description;
-        okBtn.style.display = "inline-block";
-    } else {
-        let localAbort = false;
-        popup.onclick = function(e) {
-            if (!e.target.closest('button')) {
-                localAbort = true;
-            }
-        };
+// Split the input into heading and description
+let heading = "";
+let descriptionHtml = description;
+const strongMatch = description.match(/^<strong>(.*?)<\/strong><br\s*\/?>/i);
+if (strongMatch) {
+    heading = strongMatch[1];
+    descriptionHtml = description.replace(/^<strong>.*?<\/strong><br\s*\/?>/i, "");
+}
 
-        // Typewriter effect with abort support
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = description;
-        const plain = tempDiv.textContent || tempDiv.innerText || "";
-        textTarget.textContent = "";
-        let i = 0;
-
-        function type() {
-            if (localAbort) {
-                textTarget.innerHTML = description;
-                okBtn.style.display = "inline-block";
-                popup.onclick = null;
-                return;
-            }
-            if (i < plain.length) {
-                textTarget.textContent += plain.charAt(i);
-                i++;
-                setTimeout(type, 18);
-            } else {
-                textTarget.innerHTML = description;
-                okBtn.style.display = "inline-block";
-                popup.onclick = null;
-            }
+if (typeof testmode !== "undefined" && testmode) {
+    headingTarget.textContent = heading;
+    textTarget.innerHTML = descriptionHtml;
+    okBtn.style.display = "inline-block";
+} else {
+    let localAbort = false;
+    popup.onclick = function(e) {
+        if (!e.target.closest('button')) {
+            localAbort = true;
         }
-        type();
+    };
+
+    // Typewriter for heading, then for description
+    function typeHeading(i = 0) {
+        if (localAbort) {
+            headingTarget.textContent = heading;
+            typeDescription(true);
+            return;
+        }
+        if (i < heading.length) {
+            headingTarget.textContent += heading.charAt(i);
+            setTimeout(() => typeHeading(i + 1), 24);
+        } else {
+            typeDescription();
+        }
     }
+
+    function typeDescription(forceShow = false, j = 0) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = descriptionHtml;
+        const plain = tempDiv.textContent || tempDiv.innerText || "";
+        if (forceShow) {
+            textTarget.innerHTML = descriptionHtml;
+            okBtn.style.display = "inline-block";
+            popup.onclick = null;
+            return;
+        }
+        if (j < plain.length) {
+            textTarget.textContent += plain.charAt(j);
+            setTimeout(() => typeDescription(false, j + 1), 18);
+        } else {
+            textTarget.innerHTML = descriptionHtml;
+            okBtn.style.display = "inline-block";
+            popup.onclick = null;
+        }
+    }
+
+    headingTarget.textContent = "";
+    textTarget.textContent = "";
+    typeHeading();
+}
 
     okBtn.onclick = function() {
         popup.remove();
@@ -2165,8 +2206,14 @@ function showLeonaConfrontsBoss(callback) {
         type();
     }
 
-    finishBtn.onclick = function() {
+   finishBtn.onclick = function() {
         popup.remove();
+        // Mark that the player finished the full run
+        window.hasFinishedPart2 = true;
+        localStorage.setItem('hasFinishedPart2', 'true');
+        // Show the rerun button on the menu
+        const startPrinciplesBtn = document.getElementById('startPrinciplesBtn');
+        if (startPrinciplesBtn) startPrinciplesBtn.style.display = 'inline-block';
         if (callback) callback();
     };
 }
@@ -2255,7 +2302,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 
-        const optionsBtn = document.getElementById('optionsBtn');
+    const optionsBtn = document.getElementById('optionsBtn');
     const optionsMenu = document.getElementById('optionsMenu');
     const closeOptionsBtn = document.getElementById('closeOptionsBtn');
 
@@ -2267,6 +2314,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (closeOptionsBtn && optionsMenu) {
         closeOptionsBtn.onclick = function() {
             optionsMenu.style.display = 'none';
+        };
+    }
+
+    const startPrinciplesBtn = document.getElementById('startPrinciplesBtn');
+    if (startPrinciplesBtn) {
+        startPrinciplesBtn.onclick = function() {
+            startPart3();
         };
     }
 });
@@ -2401,6 +2455,13 @@ function showOptionsPopup() {
         popup.remove();
         showThankYouPopup();
     };
+}
+
+// On page load
+if (localStorage.getItem('hasFinishedPart2') === 'true') {
+    const startPrinciplesBtn = document.getElementById('startPrinciplesBtn');
+    if (startPrinciplesBtn) startPrinciplesBtn.style.display = 'inline-block';
+    window.hasFinishedPart2 = true;
 }
 
 </script>
