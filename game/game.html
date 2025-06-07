@@ -993,6 +993,7 @@ function handleStartGame() {
         const typewriterTarget = document.getElementById('typewriterText');
         const introImage = document.getElementById('introImage');
         const nextBtn = document.getElementById('nextIntroBtn');
+        nextBtn.focus();
 
         function showSection(idx) {
             let localAbort = false; // Local abort flag for this section
@@ -1164,6 +1165,7 @@ function handleStartGame() {
             document.getElementById('part1').style.display = 'block';
             updateMap();
         };
+        document.getElementById('closeCharacterBtn').focus();
     }
 
     function showPart1TaskIntroPopup() {
@@ -1209,6 +1211,7 @@ function handleStartGame() {
             updateSuspicionBar(20); // <-- Marker at 20 for Game 1
             updateMap();
         };
+        document.getElementById('part1TaskIntroOkBtn').focus();
     }
 
         // ====== PART 2: TEXT SELECTION ======
@@ -1256,6 +1259,7 @@ function handleStartGame() {
         const typewriterTarget = document.getElementById('typewriterText');
         const introImage = document.getElementById('introImage');
         const nextBtn = document.getElementById('nextIntroBtn');
+        nextBtn.focus();
 
         function showSection(idx) {
             let localAbort = false; // Local abort flag for this section
@@ -1422,6 +1426,7 @@ function handleStartGame() {
             document.getElementById('suspicionBarContainer').style.display = 'block'; // Show suspicion bar
             updateSuspicionBar(15);
         };
+        document.getElementById('part2TaskIntroOkBtn').focus();
     }
 
     function showPrincipleSelectionModal(correctPrinciplesSelected) {
@@ -1457,6 +1462,7 @@ function handleStartGame() {
     // Checkbox logic: enable button only if 3 are checked
     const form = document.getElementById('principleSelectionForm');
     const btn = document.getElementById('confirmPrinciplesBtn');
+    btn.focus();
     form.addEventListener('change', function() {
         const checked = form.querySelectorAll('input[type="checkbox"]:checked');
         btn.disabled = checked.length !== 3;
@@ -1581,6 +1587,7 @@ function showPrincipleAutoIntro(principles) {
         modal.remove();
         startPart3();
     };
+    document.getElementById('confirmPrinciplesBtn').focus();
 }
 
     // ====== PART 3: PRINCIPLE STAGES ======
@@ -1758,6 +1765,7 @@ function showOverlayDescription(description, callback) {
     const headingTarget = document.getElementById('overlayDescriptionHeading');
     const textTarget = document.getElementById('overlayDescriptionText');
     const okBtn = document.getElementById('overlayDescriptionOkBtn');
+    okBtn.focus();
 
     // Split the input into heading and description
     let heading = "";
@@ -1901,6 +1909,7 @@ function showPrincipleStoryInput(principle, onContinue) {
         popup.remove();
         if (onContinue) onContinue();
     };
+    document.getElementById('principleStoryContinueBtn').focus();
 }
 
 function showFinalPrincipleStory(callback) {
@@ -1937,6 +1946,7 @@ function showFinalPrincipleStory(callback) {
 
     const storyTarget = document.getElementById('finalPrincipleStoryText');
     const finishBtn = document.getElementById('finalPrincipleStoryContinueBtn');
+    finishBtn.focus();
 
     if (typeof testmode !== "undefined" && testmode) {
         storyTarget.innerHTML = story;
@@ -2076,6 +2086,7 @@ function showFinalDiscoveryPopup(callback) {
             updatePrincipleBadges();
         });
     };
+    document.getElementById('finalDiscoveryOkBtn').focus();
 }
 
 function showLeonaConfrontsBoss(callback) {
@@ -2118,6 +2129,7 @@ function showLeonaConfrontsBoss(callback) {
 
     const storyTarget = document.getElementById('leonaBossStoryText');
     const finishBtn = document.getElementById('leonaBossFinishBtn');
+    finishBtn.focus();
 
     if (typeof testmode !== "undefined" && testmode) {
         storyTarget.innerHTML = story;
@@ -2209,6 +2221,7 @@ function showThankYouPopup() {
 
     const textTarget = document.getElementById('thankYouText');
     const okBtn = document.getElementById('thankYouOkBtn');
+    okBtn.focus();
 
     // Use your typewriter effect
     typewriterEffect(textTarget, text, function() {
@@ -2270,23 +2283,31 @@ function showOptionsPopup() {
     document.getElementById('closeOptionsPopupBtn').onclick = function() {
         popup.remove();
     };
+    document.getElementById('closeOptionsPopupBtn').focus();
 
     document.getElementById('optStartPart2Btn').onclick = function() {
         popup.remove();
         startPart2();
     };
+    document.getElementById('optStartPart2Btn').focus();
+
     document.getElementById('optStartPart3Btn').onclick = function() {
         popup.remove();
         startPart3();
     };
+    document.getElementById('optStartPart3Btn').focus();
+
     document.getElementById('optStartPart4Btn').onclick = function() {
         popup.remove();
         startPart4();
     };
+    document.getElementById('optStartPart4Btn').focus();
+
     document.getElementById('optThankYouBtn').onclick = function() {
         popup.remove();
         showThankYouPopup();
     };
+    document.getElementById('optThankYouBtn').focus();
 }
 
 // On page load
@@ -2313,6 +2334,7 @@ document.addEventListener('DOMContentLoaded', function() {
             returnToMenu();
         };
         const showThankYouBtn = document.getElementById('showThankYouBtn');
+        showThankYouBtn.focus();
         if (showThankYouBtn) showThankYouBtn.onclick = showThankYouPopup;
     }
 
@@ -2342,6 +2364,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     const startPrinciplesBtn = document.getElementById('startPrinciplesBtn');
+    startPrinciplesBtn.focus();
     if (startPrinciplesBtn) startPrinciplesBtn.onclick = function() {
         startPart3();
     };
