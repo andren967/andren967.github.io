@@ -120,6 +120,15 @@ body, h1, h2, h3, h4, h5, h6, p, .popup-content, .modal-content, .choices button
     text-align: center;
     box-sizing: border-box;
 }
+
+.menu-credit {
+    margin-top: 2em;
+    font-size: 1em;
+    color: #7a5a2b;
+    opacity: 0.8;
+    font-family: 'Special Elite', 'Source Sans 3', Arial, sans-serif;
+}
+
 /* Main menu and navigation buttons */
 #mainStartBtn, #showThankYouBtn, #optionsBtn, #startPrinciplesBtn, #finishBtn {
     background: #5a310e;
