@@ -26,9 +26,10 @@
     <div id="principleBadges" style="margin:1em 0; text-align:center;"></div>
     <button id="showThankYouBtn" style="display:none; margin-top:1em;" onclick="showThankYouPopup()">View Ending</button>
     <button id="mainStartBtn" onclick="startPart1()" style="margin: 1.5em 0 1em 0; font-size:1.3em;">Start Game</button>
-    <!--
-    <button id="optionsBtn" onclick="showOptionsPopup()" style="margin-bottom:1em;">Options</button>
-    -->
+    
+    <!--button id="optionsBtn" onclick="showOptionsPopup()" style="margin-bottom:1em;">Options</button-->
+    <button id="optionsBtn" onclick="showOptionsPopup()" style="display:none; margin-bottom:1em;">Options</button>
+    
     <button id="startPrinciplesBtn" onclick="startPart2()" style="display:none; margin-bottom:1em; font-size:1.3em;">Re-Run (From Principles Selection)</button>    
     <div class="menu-credit">Created by André Novak</div>
 </div>
@@ -95,6 +96,7 @@
             </div>
         </div>
     </div>
+    <button id="enlargePart3MapBtn" class="enlarge-map-btn" style="margin-top:1em;">Enlarge Map</button>
     <div id="principleList" style="margin-top:1em;text-align:center;"></div>
 </div>
 
@@ -103,7 +105,7 @@
     <div class="suspicion-bar-bg" style="position:relative;">
         <div id="suspicionBar" style="position:relative; width:110px; height:18px;"></div>
         <div id="suspicionMarker" style="position:absolute;top:0;left:0;height:100%;width:100%;pointer-events:none;"></div>
-        <span id="suspicionValue">5 / 25</span>
+        <!--<span id="suspicionValue" >5 / 25</span>-->
     </div>
     <div id="suspicionChange"></div>
 </div>
@@ -610,13 +612,10 @@ function showSuspicionChange(amount) {
 
 function updateSuspicionBar(minSuspicion = null) {
     const bar = document.getElementById('suspicionBar');
-    const val = document.getElementById('suspicionValue');
     const percent = Math.round((suspicion / suspicionMax) * 100);
 
     // The cover overlays the unfilled part of the bar
     bar.innerHTML = `<div class="suspicion-bar-cover" style="left:${percent}%;width:${100 - percent}%;"></div>`;
-
-    val.textContent = `${suspicion} / ${suspicionMax}`;
 
     // Update the marker
     const marker = document.getElementById('suspicionMarker');
@@ -699,6 +698,13 @@ function handleStartGame() {
     // Hide any overlays or modals that might be open (defensive)
     document.body.style.overflow = '';
     document.body.classList.remove('modal-open');
+
+    // Clear the failure flag for a truly new game
+    localStorage.removeItem('hasFailedOnce');
+
+    //Hide the options button if it exists
+    const optionsBtn = document.getElementById('optionsBtn');
+    if (optionsBtn) optionsBtn.style.display = 'none';
 
     // Show the menu and reset/update state
     returnToMenu();
@@ -828,6 +834,9 @@ function handleStartGame() {
         const resultElement = document.getElementById('result');
         const buttons = document.querySelectorAll('.choices button');
 
+        // Check if the player has failed before
+        const showHints = localStorage.getItem('hasFailedOnce') === 'true';
+
         // Update the map image dynamically
         mapElement.src = maps[currentMapIndex].src;
         mapElement.alt = "Map " + (currentMapIndex + 1);
@@ -848,11 +857,16 @@ function handleStartGame() {
             };
         }
 
-        // Update button text
+        // Update button text with hints if needed
         maps[currentMapIndex].options.forEach((option, index) => {
-        buttons[index].textContent = `Text ${index + 1}: ${option.text}`;
-        buttons[index].onclick = () => chooseText(option);
-    });
+            let btnText = `Text ${index + 1}: ${option.text}`;
+            if (showHints) {
+                const color = option.suspicion > 0 ? '#1a7f1a' : '#b22222';
+                btnText += ` <span style="color:${color};font-weight:bold;">(${option.suspicion > 0 ? '+' : ''}${option.suspicion})</span>`;
+            }
+            buttons[index].innerHTML = btnText;
+            buttons[index].onclick = () => chooseText(option);
+        });
     
     // Clear the result text
     resultElement.textContent = '';
@@ -900,6 +914,10 @@ function handleStartGame() {
                 storyText.innerHTML = `<img src="images/game_over1.png" alt="Story Image" style="max-width:100%;margin-bottom:1em;"><br>
                 The map was bold, dramatic—just like the others. Leona typed her commentary without hesitation, echoing the same lines she’d learned to use: strength, division, vigilance. She didn’t question the scale, or why some countries seemed stretched while others shrank. She filed her text, straightened her desk, and waited for the next assignment. The maps kept coming, and Leona kept writing—never realizing that she’d become part of the message.`;
                 isFailure = true;
+                localStorage.setItem('hasFailedOnce', 'true');
+                // Show the Options button after failure
+                const optionsBtn = document.getElementById('optionsBtn');
+                if (optionsBtn) optionsBtn.style.display = 'inline-block';
             }
         } else {
             const story = maps[currentMapIndex].story || "No story for this map.";
@@ -913,6 +931,7 @@ function handleStartGame() {
 
             // If failure, hook into the modal close to show failure screen
         if (isFailure) {
+            localStorage.setItem('hasFailedOnce', 'true');
             // Override closeModal for this case
             const originalCloseModal = closeModal;
             closeModal = function() {
@@ -1491,6 +1510,13 @@ function finishGame() {
             Without grasping the power of the maps she annotated, she stayed inside the frame others had drawn.
             The world moved on. And she, still at her desk, never saw the full picture.`;
         failureModal.style.display = 'flex';
+        isFailure = true;
+        localStorage.setItem('hasFailedOnce', 'true');
+
+        // Show the Options button after failure
+        const optionsBtn = document.getElementById('optionsBtn');
+        if (optionsBtn) optionsBtn.style.display = 'inline-block';
+
         return;
     }
     const correctSelections = selectedWords.filter(word => correctPrinciples.includes(word));
@@ -1625,6 +1651,22 @@ function showPrincipleAutoIntro(principles) {
         mapElement.src = maps[currentMapIndex];
         document.getElementById('part3Title').textContent = `Princple: ${principle} (Map ${currentMapIndex + 1} of ${maps.length})`;
 
+        //Enlarge Map Button of Game 3
+        const enlargeBtn = document.getElementById('enlargePart3MapBtn');
+        const imagePopup = document.getElementById('imagePopup');
+        const popupImg = document.getElementById('popupImg');
+        if (enlargeBtn && mapElement && imagePopup && popupImg) {
+            enlargeBtn.onclick = function(e) {
+                e.stopPropagation();
+                popupImg.src = mapElement.src;
+                imagePopup.style.display = 'flex';
+            };
+            imagePopup.onclick = function() {
+                imagePopup.style.display = 'none';
+                popupImg.src = "";
+            };
+        }
+
         // --- Dynamic overlay logic ---
         // Remove previous overlays
         mapOverlay.innerHTML = "";
@@ -1726,6 +1768,7 @@ document.getElementById('highlightableText').addEventListener('click', function 
         }
         // Clamp suspicion and update bar
         suspicion = Math.max(0, Math.min(suspicionMax, suspicion));
+        document.getElementById('suspicionBarContainer').style.display = 'block';
         updateSuspicionBar(15);
     }
 });
@@ -2261,9 +2304,9 @@ function showOptionsPopup() {
                 <input type="checkbox" id="testmodeCheckboxPopup" ${testmode ? 'checked' : ''}/>
                 Testmode (skip animations)
             </label>
-            <button id="optStartPart2Btn">Start Part 2: Text Selection</button>
-            <button id="optStartPart3Btn">Start Part 3: Principles</button>
-            <button id="optStartPart4Btn">Start Part 4: Two Worlds Principle Discovery</button>
+            <button id="optStartPart2Btn">Start Game 2: Text Selection</button>
+            <button id="optStartPart3Btn">Start Game 3: Principles</button>
+            <button id="optStartPart4Btn">Start Game 4: Two Worlds Principle Discovery</button>
             <button id="optThankYouBtn">Start Thank You</button>
             <button id="closeOptionsPopupBtn" style="margin-top:1em;">Close Options</button>
         </div>
@@ -2384,6 +2427,22 @@ document.addEventListener('DOMContentLoaded', function() {
             imagePopup.style.display = 'none';
             popupImg.src = "";
         });
+    }
+
+    // Enlarge map button for Part 3
+    const enlargeBtn = document.getElementById('enlargePart3MapBtn');
+    const part3Map = document.getElementById('part3Map');
+    if (enlargeBtn && part3Map && imagePopup && popupImg) {
+        enlargeBtn.onclick = function(e) {
+            e.stopPropagation();
+            popupImg.src = part3Map.src;
+            imagePopup.style.display = 'flex';
+        };
+        // Also allow closing popup
+        imagePopup.onclick = function() {
+            imagePopup.style.display = 'none';
+            popupImg.src = "";
+        };
     }
 
     // Testmode checkbox sync
